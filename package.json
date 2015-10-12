@@ -1,0 +1,28 @@
+{
+  "name": "pyneuron",
+  "version": "1.0.0",
+  "description": "pyneuron",
+  "main": "index.js",
+  "scripts": {
+    "test": "./node_modules/.bin/mocha --reporter spec ./test/*.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/neuron-js/pyneuron.git"
+  },
+  "keywords": [
+    "pyneuron"
+  ],
+  "engines": {
+    "node": ">=0.10.0"
+  },
+  "author": "neuron-js",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/neuron-js/pyneuron/issues"
+  },
+  "devDependencies": {
+    "mocha": "*",
+    "chai": "*"
+  }
+}
