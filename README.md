@@ -1,19 +1,25 @@
-[[![Build Status](https://travis-ci.org/neuron-js/pyneuron.svg?branch=master)](https://travis-ci.org/neuron-js/pyneuron)
+[![Build Status](https://travis-ci.org/neuron-js/pyneuron.svg?branch=master)](https://travis-ci.org/neuron-js/pyneuron)
 
 # pyneuron
 
-Python utilities for neuron.js
+Python utilities and middleware for neuron.js
 
 ## Install
 
 ```sh
-$ npm install pyneuron --save
+$ pip install pyneuron
 ```
 
 ## Usage
 
 ```py
-import pyneuron 
+from pyneuron import neuron
+
+neuron_instance = neuron(
+  dependency_tree=dependency_tree,
+  decorate=decorator,
+  path='mod'
+)
 ```
 
 ## License
