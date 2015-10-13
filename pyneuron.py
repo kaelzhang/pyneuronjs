@@ -96,11 +96,11 @@ class neuron(object):
     for combo in self.combos:
       combo = self._clean_combo(combo, already, package_names)
       if len(combo):
-        scripts.append(self.decorate(map(dec, combo)))
+        scripts.append(self.decorate(map(dec, combo), 'async'))
 
     # The ones not in combos
     for package_name in package_names:
-      scripts.append(self.decorate(dec(package_name)))
+      scripts.append(self.decorate(dec(package_name), 'async'))
 
     return '\n'.join(scripts)
 
@@ -123,7 +123,7 @@ class neuron(object):
 
   def _output_all_scripts(self):
     return '\n'.join([
-      self.decorate(self._package_to_path(package_name, version))
+      self.decorate(self._package_to_path(package_name, version), 'async')
       for package_name, version in self.packages
     ])
 
