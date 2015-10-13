@@ -7,7 +7,9 @@ import json
 
 class neuron(object):
   # @param {dict} options
-  # - 
+  # - dependency_tree `dict`
+  # - decorate `function`
+  # - path `str`
   def __init__(self, **options):
     option_list = [
       ('dependency_tree', {}),
@@ -144,19 +146,21 @@ class neuron(object):
     ]
 
 
-# {
-#   "a": {
-#   "*": {
-#     "dependencies": {
-#     "b": "*"
-#     }
-#   }
-#   },
-#   "b": {
-#   "*": {}
-#   }
-# }
 class walker(object):
+
+  # @param {dict} tree
+  # {
+  #   "a": {
+  #     "*": {
+  #       "dependencies": {
+  #         "b": "*"
+  #       }
+  #     }
+  #   },
+  #   "b": {
+  #     "*": {}
+  #   }
+  # }
   def __init__(self, tree):
     self.tree = tree
 
@@ -230,9 +234,14 @@ class walker(object):
 class uniqueOrderedList(list):
   def __iadd__(self, other):
     if type(other) is not list and type(other) is not self.__class__:
+      # Actually, it will fail
       return super(self.__class__, self).__add__(other)
 
     for item in other:
+      # In python, `+=` will change the referenced list object,
+      # even if passed as a parameter to a function, 
+      # unlike javascript and many other languages.
+      # So, we need to change the original list
       self.push(item)
     return self
 
