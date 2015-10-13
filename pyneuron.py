@@ -3,7 +3,7 @@
 """
 """
 
-__all__ = ['neuron', 'uniqueOrderedList', 'decorate']
+__all__ = ['neuron', 'decorate']
 
 import json
 import hashlib
@@ -22,6 +22,8 @@ def memoize(fn):
     result = fn(self, *args)
     self.cache.save(hash_id, result)
     return result
+
+  return method
 
 def beforeoutput(fn):
   def method(self, *args):
@@ -42,23 +44,23 @@ class neuron(object):
   def __init__(self, **options):
     option_list = [
       ('dependency_tree', {}),
-      ('decorate', neuron._default_decorator),
+      ('resolve', neuron._default_resolver),
       ('path', ''),
       ('is_debug', False),
+      ('version', 0),
       ('cache', None)
     ]
     for key, default in option_list:
-      setattr(self, '_' + key, options.get(key) or default)
+      setattr(self, key, options.get(key) or default)
 
     if hasattr(self.is_debug, '__call__'):
-      self.is_debug = self._is_debug_fn
+      self._is_debug = self._is_debug_fn
     else:
-      self._is_debug = bool(self._is_debug)
-      self.is_debug = self._is_debug_bool
+      self.is_debug = bool(self.is_debug)
+      self._is_debug = self._is_debug_bool
 
     if self.path.startswith('/'):
       self.path = self.path[1:]
-
     if self.path.endswith('/'):
       self.path = self.path[0:-1]
 
@@ -76,8 +78,8 @@ class neuron(object):
     return self.is_debug
 
   @staticmethod
-  def _default_decorator(pathname):
-    return pathname
+  def _default_resolver(pathname):
+    return '/' + pathname
 
   @beforeoutput
   def facade(self, module_id, data=None):
