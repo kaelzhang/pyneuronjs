@@ -3,7 +3,36 @@
 """
 """
 
+__all__ = ['neuron', 'uniqueOrderedList', 'decorate']
+
 import json
+import hashlib
+
+
+def memoize(fn):
+  def method(self, *args):
+    # prevent saving cache for empty facades
+    if not self.cache or not len(self.facades):
+      return fn(self, *args)
+
+    hash_id = self._get_identifier_hash()
+    if self.cache.has(hash_id):
+      return self.cache.get(hash_id)
+
+    result = fn(self, *args)
+    self.cache.save(hash_id, result)
+    return result
+
+def beforeoutput(fn):
+  def method(self, *args):
+    if self.outputted:
+      return ''
+    return fn(self, *args)
+  
+  return method
+
+def beforecssoutput(fn):
+  return fn
 
 class neuron(object):
   # @param {dict} options
@@ -14,10 +43,18 @@ class neuron(object):
     option_list = [
       ('dependency_tree', {}),
       ('decorate', neuron._default_decorator),
-      ('path', '')
+      ('path', ''),
+      ('is_debug', False),
+      ('cache', None)
     ]
     for key, default in option_list:
-      setattr(self, key, options.get(key) or default)
+      setattr(self, '_' + key, options.get(key) or default)
+
+    if hasattr(self.is_debug, '__call__'):
+      self.is_debug = self._is_debug_fn
+    else:
+      self._is_debug = bool(self._is_debug)
+      self.is_debug = self._is_debug_bool
 
     if self.path.startswith('/'):
       self.path = self.path[1:]
@@ -25,27 +62,40 @@ class neuron(object):
     if self.path.endswith('/'):
       self.path = self.path[0:-1]
 
+    self.version = str(self.version)
+    self.outputted = False
     self.facades = []
     self.combos = []
-    self.walker = walker(self.dependency_tree)
+    self.walker = walker(self._dependency_tree)
     self.packages = []
+
+  def _is_debug_fn(self):
+    return self.is_debug()
+
+  def _is_debug_bool(self):
+    return self.is_debug
 
   @staticmethod
   def _default_decorator(pathname):
     return pathname
 
-  def facade(self, module_id, data):
+  @beforeoutput
+  def facade(self, module_id, data=None):
     self.facades.append(
-      (module_id, data or {})
+      (module_id, data)
     )
+
+    # Actually, neuron.facade() will output nothing
     return ''
 
   # defines which packages should be comboed
+  @beforeoutput
   def combo(self, *package_names):
     self.combos.append(package_names)
     return ''
 
   # TODO
+  @beforecssoutput
   def css(self):
     return ''
 
@@ -53,7 +103,9 @@ class neuron(object):
   def output_css(self):
     return ''
 
+  @memoize
   def output(self):
+    self.outputted = True
     self._analysis()
 
     return '\n'.join([
@@ -62,6 +114,15 @@ class neuron(object):
       self._output_scripts(),
       self._output_facades()
     ])
+
+  def _get_identifier_hash():
+    s = self.version + ':' + ','.join([
+      package_name for package_name, data in self.facades
+    ])
+
+    m = hashlib.sha1()
+    m.update(s)
+    return m.hexdigest()[0:8]
 
   def _output_facades(self):
     return '\n'.join([
@@ -74,7 +135,10 @@ class neuron(object):
     ])
 
   def _output_facade(self, package_name, data):
-    return 'facade(\'%s\', %s)' % (package_name, json.dumps(data))
+    json_str = ''
+    if data:
+      json_str = ', ' + json.dumps(data)
+    return 'facade(\'%s\'%s)' % (package_name, json_str)
 
   def _output_loaded(self):
     pass
