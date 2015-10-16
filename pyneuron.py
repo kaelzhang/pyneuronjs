@@ -3,12 +3,12 @@
 """
 """
 
-__all__ = ['neuron', 'decorate']
+__all__ = ['neuron', 'decorate', 'uniqueOrderedList']
 
 import json
 import hashlib
 
-
+# Memoize 
 def memoize(fn):
   def method(self, *args):
     # prevent saving cache for empty facades
@@ -30,17 +30,13 @@ def beforeoutput(fn):
     if self.outputted:
       return ''
     return fn(self, *args)
-  
+
   return method
 
 def beforecssoutput(fn):
   return fn
 
 class neuron(object):
-  # @param {dict} options
-  # - dependency_tree `dict`
-  # - decorate `function`
-  # - path `str`
   def __init__(self, **options):
     option_list = [
       ('dependency_tree', {}),
@@ -59,6 +55,9 @@ class neuron(object):
       self.is_debug = bool(self.is_debug)
       self._is_debug = self._is_debug_bool
 
+    # /mod  -> mod
+    # mod/  -> mod
+    # /mod/ -> mod 
     if self.path.startswith('/'):
       self.path = self.path[1:]
     if self.path.endswith('/'):
@@ -93,7 +92,9 @@ class neuron(object):
   # defines which packages should be comboed
   @beforeoutput
   def combo(self, *package_names):
-    self.combos.append(package_names)
+    # If debug, combos will not apply
+    if not self._is_debug():
+      self.combos.append(package_names)
     return ''
 
   # TODO
@@ -110,16 +111,17 @@ class neuron(object):
     self.outputted = True
     self._analysis()
 
-    return '\n'.join([
+    return '\n'.join(filter(lambda: x: x, [
       self._output_neuron(),
       self._output_config(),
       self._output_scripts(),
       self._output_facades()
-    ])
+    ]))
 
+  # creates the hash according to the facades
   def _get_identifier_hash():
     s = self.version + ':' + ','.join([
-      package_name for package_name, data in self.facades
+      package_name for package_name, data in self.facades.sort()
     ])
 
     m = hashlib.sha1()
@@ -152,8 +154,8 @@ class neuron(object):
     if not len(self.combos):
       return self._output_all_scripts()
 
-    def dec(package_name):
-      url = self._package_to_path(package_name, '*')
+    def resolve(package_name):
+      url = self.resolve(self._package_to_path(package_name, '*'))
       return url
 
     already = []
@@ -166,7 +168,7 @@ class neuron(object):
 
     # The ones not in combos
     for package_name in package_names:
-      scripts.append(self.decorate(dec(package_name), 'async'))
+      scripts.append(decorate(resolve(package_name), 'js', 'async'))
 
     return '\n'.join(scripts)
 
@@ -189,7 +191,13 @@ class neuron(object):
 
   def _output_all_scripts(self):
     return '\n'.join([
-      self.decorate(self._package_to_path(package_name, version), 'async')
+      decorate(
+        self.resolve(
+          self._package_to_path(package_name, version)
+        ), 
+        'js',
+        'async'
+      )
       for package_name, version in self.packages
     ])
 
@@ -284,6 +292,7 @@ class walker(object):
       {}
     ).keys()
 
+  # Try to deeply access a dict 
   @staticmethod
   def access(obj, keys, default):
     ret = obj
