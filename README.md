@@ -13,9 +13,9 @@ $ pip install pyneuron
 ## Usage
 
 ```py
-from pyneuron import neuron
+from pyneuron import Neuron
 
-neuron_instance = neuron(
+neuron_instance = Neuron(
   dependency_tree=dependency_tree,
   decorate=decorator,
   path='mod'

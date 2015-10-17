@@ -72,7 +72,6 @@ class Neuron(object):
     # list.<tuple>
     self._combos = []
     self._walker = Walker(self.dependency_tree)
-    self._packages = []
 
   def _is_debug_fn(self):
     return self.debug()
@@ -114,7 +113,6 @@ class Neuron(object):
   def output(self):
     self._outputted = True
     self._analysis()
-    self._analysis_combos()
 
     return '\n'.join([
       self._output_neuron(),
@@ -125,6 +123,45 @@ class Neuron(object):
       '</script>'
     ])
 
+  def _analysis(self):
+    self._packages = self._walker.look_up(self._facades)
+
+    # combos
+    remains = [] + self._packages
+
+    # self._combos
+    # -> [('a', 'b'), ('b', 'c', 'd')]
+    for combo in self._combos:
+      combo = self._clean_combo(combo, already, remains)
+      if len(combo):
+        scripts.append(
+          decorate(
+            self.resolve(map(dec, combo)),
+            'js'
+            'async'
+          )
+        )
+
+    # The ones not in combos
+    for package_name in remains:
+      scripts.append(decorate(resolve(package_name), 'js', 'async'))
+
+  def _clean_combo(self, combo, already, remains):
+    combo = list(combo)
+
+    def clean(item):
+      # prevent useless package
+      # and prevent duplication
+      if item not in remains:
+        return False
+
+      index = remains.index(item)
+      remains.pop(index)
+      return item
+
+    combo = map(clean, combo)
+    return filter(lambda x: x, combo)
+
   def _output_neuron(self):
     return decorate(self.resolve(self.path + '/neuron.js'), 'js')
 
@@ -133,7 +170,7 @@ class Neuron(object):
 
   # creates the hash according to the facades
   def _get_identifier_hash():
-    s = self.version + ':' + ','.join([
+    s = 'pyneuron:' + self.version + ':' + ','.join([
       package_name for package_name, data in self._facades.sort()
     ])
 
@@ -193,47 +230,6 @@ class Neuron(object):
       package_name + '.js'
     ])
 
-  def _analysis(self):
-    self._walker.look_up(self._facades, self._packages)
-    self._package_names = [
-      package_name
-      for package_name, version in self._packages
-    ]
-
-  def _analysis_combos(self):
-    # combos
-    remains = [] + self._package_names
-    for combo in self._combos:
-      combo = self._clean_combo(combo, already, remains)
-      if len(combo):
-        scripts.append(
-          decorate(
-            self.resolve(map(dec, combo)),
-            'js'
-            'async'
-          )
-        )
-
-    # The ones not in combos
-    for package_name in remains:
-      scripts.append(decorate(resolve(package_name), 'js', 'async'))
-
-  def _clean_combo(self, combo, already, remains):
-    combo = list(combo)
-
-    def clean(item):
-      # prevent useless package
-      # and prevent duplication
-      if item not in remains:
-        return False
-
-      index = remains.index(item)
-      remains.pop(index)
-      return item
-
-    combo = map(clean, combo)
-    return filter(lambda x: x, combo)
-
 
 class Walker(object):
 
@@ -255,15 +251,14 @@ class Walker(object):
 
   # @param {list} entries
   # @param {list} host_list where the result will be appended to
-  def look_up(self, entries):
-    ordered = uniqueOrderedList()
+  def look_up(self, facades):
+    parsed = []
+    selected = {}
 
-    parsed_entries = []
-    for entry, data in entries:
-      self._walk_down(entry, '*', ordered, parsed_entries)
-    ordered.reverse()
+    for name, data in facades:
+      self._walk_down(name, '*', selected, parsed_entries)
 
-    return list(ordered)
+    return selected
 
   # def _get_package(name, version):
   #   return Walker.access(this._tree, [name, version], {})
@@ -272,37 +267,31 @@ class Walker(object):
   # @param {list} entry list of package names
   # @param {dict} tree the result tree to extend
   # @param {list} parsed the list to store parsed entries
-  def _walk_down(self, name, version, ordered, parsed):
+  def _walk_down(self, name, version, selected, parsed):
     package_id = format(name + '@' + version)
 
     if package_id in parsed:
       return
     parsed.append(package_id)
 
-    package = self._get_package(name, version)
-    if not package:
-      return
-    ordered.push(package_id)
+    select(selected, name, version)
 
-    dependencies = package['dependencies']
+    dependencies = self._get_dependencies(name, version)
     if not dependencies:
       return
 
-    index_entry = ordered.index(package_id)
     for dep_name in dependencies:
-      dep_version = dependencies[dep_name]
-      dep_id = format(dep_name, dep_version)
-      if dep_id not in ordered:
-        ordered.push(dep_id)
-      else:
-        index_dep = ordered.index(dep_id)
-        if index_dep <= index_entry:
-          ordered.swap(index_entry, index_dep)
-      
-      self._walk_down(dep_name, dep_version, ordered, parsed)
+      self._walk_down(dep_name, dependencies[dep_name], ordered, parsed)
 
-  def _get_package(self, name, version):
-    return access(self._tree, [name, version])
+  def _get_dependencies(self, name, version):
+    return access(self._tree, [name, version, 'dependencies'])
+
+
+def select(dic, name, version):
+  if name not in dic:
+    dic[name] = set()
+
+  dic[name].add(version)
 
 
 def format(name, version):
@@ -316,38 +305,6 @@ def access(obj, keys, default=None):
       return default
     ret = ret[key]
   return ret
-
-
-# We need an ordered unique list
-# which should be able to swap items,
-# so we have to implement by ourself
-class uniqueOrderedList(list):
-  def __iadd__(self, other):
-    if type(other) is not list and type(other) is not self.__class__:
-      # Actually, it will fail
-      return super(self.__class__, self).__add__(other)
-
-    for item in other:
-      # In python, `+=` will change the referenced list object,
-      # even if passed as a parameter to a function, 
-      # unlike javascript and many other languages.
-      # So, we need to change the original list
-      self.push(item)
-    return self
-
-  def __add__(self, other):
-    new = uniqueList()
-    new += self
-    new += other
-    return new
-
-  # push unique
-  def push(self, item):
-    if item not in self:
-      self.append(item)
-
-  def swap(self, index_a, index_b):
-    self[index_a], self[index_b] = self[index_b], self[index_a]
 
 
 _TEMPLATE = {
