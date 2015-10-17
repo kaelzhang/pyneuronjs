@@ -3,7 +3,7 @@
 """
 """
 
-__all__ = ['neuron', 'decorate', 'uniqueOrderedList']
+__all__ = ['Neuron', 'decorate', 'uniqueOrderedList']
 
 import json
 import hashlib
@@ -15,7 +15,7 @@ def memoize(fn):
     if not self.cache or not len(self.facades):
       return fn(self, *args)
 
-    hash_id = self.__get_identifier_hash()
+    hash_id = self._get_identifier_hash()
     if self.cache.has(hash_id):
       return self.cache.get(hash_id)
 
@@ -27,7 +27,7 @@ def memoize(fn):
 
 def beforeoutput(fn):
   def method(self, *args):
-    if self.outputted:
+    if self._outputted:
       return ''
     return fn(self, *args)
 
@@ -37,11 +37,11 @@ def beforecssoutput(fn):
   return fn
 
 
-class neuron(object):
+class Neuron(object):
   def __init__(self, **options):
     option_list = [
       ('dependency_tree', {}),
-      ('resolve', neuron.__default_resolver),
+      ('resolve', Neuron._default_resolver),
       ('path', ''),
       ('debug', False),
       ('version', 0),
@@ -52,10 +52,10 @@ class neuron(object):
       setattr(self, key, options.get(key) or default)
 
     if hasattr(self.debug, '__call__'):
-      self.__is_debug = self.__is_debug_fn
+      self._is_debug = self._is_debug_fn
     else:
       self.is_debug = bool(self.debug)
-      self.__is_debug = self.__is_debug_bool
+      self._is_debug = self._is_debug_bool
 
     # /mod  -> mod
     # mod/  -> mod
@@ -65,28 +65,28 @@ class neuron(object):
     if self.path.endswith('/'):
       self.path = self.path[0:-1]
 
-    self.__version = str(self.version)
-    self.__outputted = False
-    self.__facades = []
+    self._version = str(self.version)
+    self._outputted = False
+    self._facades = []
 
     # list.<tuple>
-    self.__combos = []
-    self.__walker = walker(self.dependency_tree)
-    self.__packages = []
+    self._combos = []
+    self._walker = Walker(self.dependency_tree)
+    self._packages = []
 
-  def __is_debug_fn(self):
+  def _is_debug_fn(self):
     return self.debug()
 
-  def __is_debug_bool(self):
+  def _is_debug_bool(self):
     return self.debug
 
   @staticmethod
-  def __default_resolver(pathname):
+  def _default_resolver(pathname):
     return '/' + pathname
 
   @beforeoutput
   def facade(self, module_id, data=None):
-    self.__facades.append(
+    self._facades.append(
       (module_id, data)
     )
 
@@ -97,8 +97,8 @@ class neuron(object):
   @beforeoutput
   def combo(self, *package_names):
     # If debug, combos will not apply
-    if not self.__is_debug() and len(package_names) > 1:
-      self.__combos.append(package_names)
+    if not self._is_debug() and len(package_names) > 1:
+      self._combos.append(package_names)
     return ''
 
   # TODO
@@ -112,72 +112,72 @@ class neuron(object):
 
   @memoize
   def output(self):
-    self.__outputted = True
-    self.__analysis()
-    self.__analysis_combos()
+    self._outputted = True
+    self._analysis()
+    self._analysis_combos()
 
     return '\n'.join([
-      self.__output_neuron(),
-      self.__output_scripts(),
-      '<script>'
-      self.__output_config(),
-      self.__output_facades(),
+      self._output_neuron(),
+      self._output_scripts(),
+      '<script>',
+      self._output_config(),
+      self._output_facades(),
       '</script>'
     ])
 
-  def __output_neuron(self):
+  def _output_neuron(self):
     return decorate(self.resolve(self.path + '/neuron.js'), 'js')
 
-  def __output_config(self):
+  def _output_config(self):
     return 
 
   # creates the hash according to the facades
-  def __get_identifier_hash():
+  def _get_identifier_hash():
     s = self.version + ':' + ','.join([
-      package_name for package_name, data in self.__facades.sort()
+      package_name for package_name, data in self._facades.sort()
     ])
 
     m = hashlib.sha1()
     m.update(s)
     return m.hexdigest()[0:8]
 
-  def __output_facades(self):
+  def _output_facades(self):
     return '\n'.join([
       '<script>',
       '\n'.join([
-        self.__output_facade(package_name, data)
-        for package_name, data in self.__facades
+        self._output_facade(package_name, data)
+        for package_name, data in self._facades
       ]),
       '</script>'
     ])
 
-  def __output_facade(self, package_name, data):
+  def _output_facade(self, package_name, data):
     json_str = ''
     if data:
       json_str = ', ' + json.dumps(data)
     return 'facade(\'%s\'%s)' % (package_name, json_str)
 
-  def __output_loaded(self):
+  def _output_loaded(self):
     pass
 
-  def __output_scripts(self):
-    if self.__is_debug():
+  def _output_scripts(self):
+    if self._is_debug():
       return ''
 
-    if not len(self.__combos):
-      return self.__output_all_scripts()
+    if not len(self._combos):
+      return self._output_all_scripts()
 
     def resolve(package_name):
-      url = self.resolve(self.__package_to_path(package_name, '*'))
+      url = self.resolve(self._package_to_path(package_name, '*'))
       return url
 
     return '\n'.join(scripts)
 
-  def __output_all_scripts(self):
+  def _output_all_scripts(self):
     return '\n'.join([
       decorate(
         self.resolve(
-          self.__package_to_path(package_name, version)
+          self._package_to_path(package_name, version)
         ), 
         'js',
         'async'
@@ -185,7 +185,7 @@ class neuron(object):
       for package_name, version in self.packages
     ])
 
-  def __package_to_path(self, package_name, version):
+  def _package_to_path(self, package_name, version):
     return '/'.join([
       self.path,
       package_name,
@@ -193,18 +193,18 @@ class neuron(object):
       package_name + '.js'
     ])
 
-  def __analysis(self):
-    self.__walker.look_up(self.facades, self.__packages)
-    self.__package_names = [
+  def _analysis(self):
+    self._walker.look_up(self._facades, self._packages)
+    self._package_names = [
       package_name
-      for package_name, version in self.__packages
+      for package_name, version in self._packages
     ]
 
-  def __analysis_combos(self):
+  def _analysis_combos(self):
     # combos
-    remains = [] + self.__package_names
-    for combo in self.__combos:
-      combo = self.__clean_combo(combo, already, remains)
+    remains = [] + self._package_names
+    for combo in self._combos:
+      combo = self._clean_combo(combo, already, remains)
       if len(combo):
         scripts.append(
           decorate(
@@ -218,7 +218,7 @@ class neuron(object):
     for package_name in remains:
       scripts.append(decorate(resolve(package_name), 'js', 'async'))
 
-  def __clean_combo(self, combo, already, remains):
+  def _clean_combo(self, combo, already, remains):
     combo = list(combo)
 
     def clean(item):
@@ -235,7 +235,7 @@ class neuron(object):
     return filter(lambda x: x, combo)
 
 
-class walker(object):
+class Walker(object):
 
   # @param {dict} tree
   # {
@@ -260,7 +260,7 @@ class walker(object):
     parsed_entries = []
 
     for entry, data in entries:
-      self.__walk_down(entry, ordered, parsed_entries)
+      self._walk_down(entry, ordered, parsed_entries)
 
     ordered.reverse()
     host_list += [
@@ -272,7 +272,7 @@ class walker(object):
   # @param {list} entry list of package names
   # @param {dict} tree the result tree to extend
   # @param {list} parsed the list to store parsed entries
-  def __walk_down(self, entry, ordered, parsed):
+  def _walk_down(self, entry, ordered, parsed):
     if entry in parsed:
       return
     parsed.append(entry)
@@ -281,7 +281,7 @@ class walker(object):
       return
 
     # TODO: support real version
-    dependencies = self.__get_dependencies(entry)
+    dependencies = self._get_dependencies(entry)
 
     ordered.push(entry)
     ordered += dependencies
@@ -295,9 +295,9 @@ class walker(object):
         if index_dep <= index_entry:
           ordered.swap(index_entry, index_dep)
       
-      self.__walk_down(dep, ordered, parsed)
+      self._walk_down(dep, ordered, parsed)
 
-  def __get_dependencies(self, package_name):
+  def _get_dependencies(self, package_name):
     if package_name not in self.tree:
       return []
 
@@ -350,7 +350,7 @@ class uniqueOrderedList(list):
     self[index_a], self[index_b] = self[index_b], self[index_a]
 
 
-__TEMPLATE = {
+_TEMPLATE = {
   'js'    : '<script%s src="%s"></script>',
   'css'   : '<link%s rel="stylesheet" href="%s">',
   'other' : '<img%s alt="" src="%s"/>'
@@ -358,4 +358,4 @@ __TEMPLATE = {
 
 def decorate(url, type_, extra=''):
   extra = ' ' + extra if extra else ''
-  return __TEMPLATE.get(type_) % (extra, url)
+  return _TEMPLATE.get(type_) % (extra, url)
