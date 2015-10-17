@@ -251,71 +251,71 @@ class Walker(object):
   #   }
   # }
   def __init__(self, tree):
-    self.tree = tree
+    self._tree = tree
 
   # @param {list} entries
   # @param {list} host_list where the result will be appended to
-  def look_up(self, entries, host_list):
+  def look_up(self, entries):
     ordered = uniqueOrderedList()
+
     parsed_entries = []
-
     for entry, data in entries:
-      self._walk_down(entry, ordered, parsed_entries)
-
+      self._walk_down(entry, '*', ordered, parsed_entries)
     ordered.reverse()
-    host_list += [
-      (package_name, '*')
-      for package_name in ordered
-    ]
+
+    return list(ordered)
+
+  # def _get_package(name, version):
+  #   return Walker.access(this._tree, [name, version], {})
 
   # walk down 
   # @param {list} entry list of package names
   # @param {dict} tree the result tree to extend
   # @param {list} parsed the list to store parsed entries
-  def _walk_down(self, entry, ordered, parsed):
-    if entry in parsed:
+  def _walk_down(self, name, version, ordered, parsed):
+    package_id = format(name + '@' + version)
+
+    if package_id in parsed:
       return
-    parsed.append(entry)
+    parsed.append(package_id)
 
-    if entry not in self.tree:
+    package = self._get_package(name, version)
+    if not package:
+      return
+    ordered.push(package_id)
+
+    dependencies = package['dependencies']
+    if not dependencies:
       return
 
-    # TODO: support real version
-    dependencies = self._get_dependencies(entry)
-
-    ordered.push(entry)
-    ordered += dependencies
-
-    index_entry = ordered.index(entry)
-    for dep in dependencies:
-      if dep not in ordered:
-        ordered.push(dep)
+    index_entry = ordered.index(package_id)
+    for dep_name in dependencies:
+      dep_version = dependencies[dep_name]
+      dep_id = format(dep_name, dep_version)
+      if dep_id not in ordered:
+        ordered.push(dep_id)
       else:
-        index_dep = ordered.index(dep)
+        index_dep = ordered.index(dep_id)
         if index_dep <= index_entry:
           ordered.swap(index_entry, index_dep)
       
-      self._walk_down(dep, ordered, parsed)
+      self._walk_down(dep_name, dep_version, ordered, parsed)
 
-  def _get_dependencies(self, package_name):
-    if package_name not in self.tree:
-      return []
+  def _get_package(self, name, version):
+    return access(self._tree, [name, version])
 
-    return walker.access(
-      self.tree,
-      [package_name, '*', 'dependencies'],
-      {}
-    ).keys()
 
-  # Try to deeply access a dict 
-  @staticmethod
-  def access(obj, keys, default):
-    ret = obj
-    for key in keys:
-      if type(ret) is not dict or key not in ret:
-        return default
-      ret = ret[key]
-    return ret
+def format(name, version):
+  return name + '@' + version
+
+# Try to deeply access a dict
+def access(obj, keys, default=None):
+  ret = obj
+  for key in keys:
+    if type(ret) is not dict or key not in ret:
+      return default
+    ret = ret[key]
+  return ret
 
 
 # We need an ordered unique list
