@@ -45,7 +45,7 @@ class Neuron(object):
       ('debug', False),
       ('version', 0),
       ('cache', None),
-      ('config', {})
+      ('js_config', {})
     ]
     for key, default in option_list:
       setattr(self, key, options.get(key) or default)
@@ -212,18 +212,24 @@ class Neuron(object):
   def package_id(name, version):
     return name + '@' + version
 
+  USER_CONFIGS = ['path', 'resolve']
+
   def _output_config(self):
-    return ''
+    config = {
+      'loaded': json.dumps(self._loaded)
+    }
 
-  # creates the hash according to the facades
-  def _get_identifier_hash():
-    s = 'pyneuron:' + self.version + ':' + ','.join([
-      package_name for package_name, data in self._facades.sort()
-    ])
+    for key in Neuron.USER_CONFIGS:
+      c = self.js_config.get(key)
+      if c:
+        config[key] = c
 
-    m = hashlib.sha1()
-    m.update(s)
-    return m.hexdigest()[0:8]
+    config_pair = [
+      key + ':' + config[key]
+      for key in config
+    ]
+
+    return 'neuron.config({' + ','.join(config_pair) + '});'
 
   def _output_facades(self):
     return '\n'.join([
@@ -235,7 +241,17 @@ class Neuron(object):
     json_str = ''
     if data:
       json_str = ', ' + json.dumps(data)
-    return 'facade(\'%s\'%s)' % (package_name, json_str)
+    return 'facade(\'%s\'%s);' % (package_name, json_str)
+
+  # creates the hash according to the facades
+  def _get_identifier_hash():
+    s = 'pyneuron:' + self.version + ':' + ','.join([
+      package_name for package_name, data in self._facades.sort()
+    ])
+
+    m = hashlib.sha1()
+    m.update(s)
+    return m.hexdigest()[0:8]
 
 
 class Walker(object):

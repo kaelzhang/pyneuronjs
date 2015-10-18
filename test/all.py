@@ -40,10 +40,14 @@ nr = Neuron(
   dependency_tree=dependency_tree,
   resolve=resolve,
   debug=True,
-  js_config={}
+  js_config={
+    'path': '/mod/'
+  }
 )
 
-nr.facade('home')
+nr.facade('home', {
+  'a': 1
+})
 nr.combo('home', 'b')
 
 print nr.output()
