@@ -17,8 +17,7 @@ from pyneuron import Neuron
 
 neuron_instance = Neuron(
   dependency_tree=dependency_tree,
-  decorate=decorator,
-  path='mod'
+  resolve=resolve
 )
 ```
 

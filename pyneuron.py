@@ -120,7 +120,7 @@ class Neuron(object):
     #   'a': set(['1.1.0', '2.0.0']),
     #   'b': set(['0.0.1'])
     # }
-    self._packages = self._walker.look_up(self._facades)
+    (self._packages, self._graph) = self._walker.look_up(self._facades)
 
     combos = self._combos
     if not len(combos):
@@ -216,7 +216,8 @@ class Neuron(object):
 
   def _output_config(self):
     config = {
-      'loaded': json.dumps(self._loaded)
+      'loaded': json.dumps(self._loaded),
+      'graph': json.dumps(self._graph)
     }
 
     for key in Neuron.USER_CONFIGS:
@@ -253,6 +254,14 @@ class Neuron(object):
     m.update(s)
     return m.hexdigest()[0:8]
 
+  @staticmethod
+  def parse_package_id(package_id):
+    splitted = package_id.split('@')
+    if len(splitted) == 1:
+      return (package_id, '*')
+
+    return (splitted[0], splitted[1])
+
 
 class Walker(object):
 
@@ -271,67 +280,97 @@ class Walker(object):
   # }
   def __init__(self, tree):
     self._tree = tree
+    self.guid = 0
 
   # @param {list} entries
   # @param {list} host_list where the result will be appended to
   def look_up(self, facades):
-    parsed = []
-    selected = {}
+    self.parsed = []
+    self.selected = {}
+    self.map = {}
 
-    for name, data in facades:
-      self._walk_down(name, '*', selected, parsed)
+    facade_node = {}
+    self.graph = {
+      '_': facade_node
+    }
+    for package_id, data in facades:
+      (name, version) = Neuron.parse_package_id(package_id)
+      self._walk_down(name, version, version, facade_node)
 
-    return selected
+    return (self.selected, self.graph)
 
-  # def _get_package(name, version):
-  #   return Walker.access(this._tree, [name, version], {})
+  def _guid(self):
+    uid = self.guid;
+    self.guid += 1
+    return uid
 
-  # walk down 
+  # walk down
   # @param {list} entry list of package names
   # @param {dict} tree the result tree to extend
   # @param {list} parsed the list to store parsed entries
-  def _walk_down(self, name, version, selected, parsed):
+  def _walk_down(self, name, range_, version, dependency_node):
+    # if the node is already parsed, 
+    # sometimes we still need to add the dependency to the parent node
+    package_range_id = Neuron.package_id(name, range_)
     package_id = Neuron.package_id(name, version)
+    (node, index) = self._get_graph_node(package_id, version)
+    dependency_node[package_range_id] = index
 
-    if package_id in parsed:
+    if package_id in self.parsed:
       return
-    parsed.append(package_id)
+    self.parsed.append(package_id)
 
-    select(selected, name, version)
+    self._select(name, version)
 
+    # Walk dependencies
     dependencies = self._get_dependencies(name, version)
     if not dependencies:
       return
 
-    for dep_name in dependencies:
-      self._walk_down(dep_name, dependencies[dep_name], selected, parsed)
+    current_dependency_node = self._get_dependency_node(node)
+    for dep in dependencies:
+      (dep_name, dep_range) = Neuron.parse_package_id(dep)
+      dep_version = dependencies[dep]
+      self._walk_down(dep_name, dep_range, dep_version, current_dependency_node)
 
   def _get_dependencies(self, name, version):
-    return access(self._tree, [name, version, 'dependencies'])
+    return Walker.access(self._tree, [name, version, 'dependencies'])
 
+  def _select(self, name, version):
+    selected = self.selected
+    if name not in selected:
+      selected[name] = set()
 
-def parse_package_id(package_id):
-    splitted = package_id.split('@')
-    if len(splitted) == 1:
-      return (package_id, '*')
+    selected[name].add(version)
 
-    return (splitted[0], splitted[1])
+  def _get_graph_node(self, package_id, version):
+    if package_id in self.map:
+      index = self.map[package_id]
+      return (self.graph[index], index)
 
-def select(dic, name, version):
-  if name not in dic:
-    dic[name] = set()
+    index = self._guid()
+    self.map[package_id] = index
+    node = [version]
+    self.graph[index] = node
+    return (node, index)
+    
 
-  dic[name].add(version)
+  def _get_dependency_node(self, node):
+    if len(node) == 1:
+      dependency_node = {}
+      node.append(dependency_node)
+      return dependency_node
+    return node[1]
 
-
-# Try to deeply access a dict
-def access(obj, keys, default=None):
-  ret = obj
-  for key in keys:
-    if type(ret) is not dict or key not in ret:
-      return default
-    ret = ret[key]
-  return ret
+  # Try to deeply access a dict
+  @staticmethod
+  def access(obj, keys, default=None):
+    ret = obj
+    for key in keys:
+      if type(ret) is not dict or key not in ret:
+        return default
+      ret = ret[key]
+    return ret
 
 
 _TEMPLATE = {
