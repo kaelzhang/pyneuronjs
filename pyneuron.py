@@ -68,6 +68,7 @@ class Neuron(object):
     self._version = str(self.version)
     self._outputted = False
     self._facades = []
+    self._loaded = []
 
     # list.<tuple>
     self._combos = []
@@ -134,25 +135,24 @@ class Neuron(object):
     if not len(combos):
       return
 
-    already = []
     self._combos = []
     # self._combos
     # -> [('a', 'b'), ('b', 'c', 'd')]
     for combo in combos:
-      combo = self._clean_combo(combo, already)
+      combo = self._clean_combo(combo)
       if len(combo):
         self._combos.append(combo)
 
-  def _clean_combo(self, combo, already):
+  def _clean_combo(self, combo):
     combo = list(combo)
 
     def clean(item):
       (name, version) = parse_package_id(item)
-      package_id = format(name, vesion)
+      package_id = Neuron.package_id(name, vesion)
 
-      if package_id in already:
+      if package_id in self._loaded:
         return False
-      already.append(package_id)
+      self._loaded.append(package_id)
 
       # prevent useless package
       # and prevent duplication
@@ -180,6 +180,7 @@ class Neuron(object):
 
     for name in self._packages:
       for version in self._packages[name]:
+        self._loaded.append(Neuron.package_id(name, version))
         self._decorate_script(output, name, version)
 
     return '\n'.join(output)
@@ -187,7 +188,7 @@ class Neuron(object):
   def _decorate_combos_scripts(self, output):
     for combo in self._combos:
       joined_combo = [
-        self._package_to_path(*package)
+        Neuron.module_id(*package)
         for package in combo
       ]
 
@@ -200,21 +201,25 @@ class Neuron(object):
 
   def _decorate_script(self, output, name, version):
     script = decorate(
-      self.resolve(
-        self._package_to_path(name, version)
-      ),
+      self.resolve(Neuron.module_id(name, version)),
       'js',
       'async'
     )
     output.append(script)
 
-  def _package_to_path(self, package_name, version):
-    return '/'.join([
-      self.path,
-      package_name,
-      version,
-      package_name + '.js'
-    ])
+  # format to module id
+  @staticmethod
+  def module_id(name, version, path=''):
+    # 'a', '*', '' -> 'a@*/a.js'
+    # 'a', '*', '/' -> 'a@*/a.js'
+    if not path or path == '/':
+      path = '/' + name + '.js'
+
+    return Neuron.package_id(name, version) + path
+
+  @staticmethod
+  def package_id(name, version):
+    return name + '@' + version
 
   def _output_config(self):
     return ''
@@ -279,7 +284,7 @@ class Walker(object):
   # @param {dict} tree the result tree to extend
   # @param {list} parsed the list to store parsed entries
   def _walk_down(self, name, version, selected, parsed):
-    package_id = format(name, version)
+    package_id = Neuron.package_id(name, version)
 
     if package_id in parsed:
       return
@@ -292,10 +297,11 @@ class Walker(object):
       return
 
     for dep_name in dependencies:
-      self._walk_down(dep_name, dependencies[dep_name], ordered, parsed)
+      self._walk_down(dep_name, dependencies[dep_name], selected, parsed)
 
   def _get_dependencies(self, name, version):
     return access(self._tree, [name, version, 'dependencies'])
+
 
 def parse_package_id(package_id):
     splitted = package_id.split('@')
@@ -310,9 +316,6 @@ def select(dic, name, version):
 
   dic[name].add(version)
 
-
-def format(name, version):
-  return name + '@' + version
 
 # Try to deeply access a dict
 def access(obj, keys, default=None):

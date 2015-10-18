@@ -1,5 +1,6 @@
 from env import ABSPATH
 import os
+import json
 
 from pyneuron import Neuron
 
@@ -20,14 +21,29 @@ version = dependency_tree.get('_version')
 # unset `dependency_file` which might leak the file structure of server
 dependency_file = None
 
-print version, dependency_tree
+def resolve(module_ids):
+  if type(module_ids) is not list:
+    return _resolve(module_ids)
+
+  module_ids = [
+    _resolve(i)
+    for i in module_ids
+  ]
+
+  return '/concat' + ','.join(module_ids)
+
+def _resolve(module_id):
+  return '/mod' + '/' + module_id.replace('@', '/')
 
 nr = Neuron(
   version=version,
   dependency_tree=dependency_tree,
-  # resolve=resolve,
+  resolve=resolve,
   path='mod',
-  debug=True
+  debug=True,
+  js_config={
+    'path': 'http://localhost:8000/mod'
+  }
 )
 
 nr.facade('home')
