@@ -263,7 +263,7 @@ class Neuron(object):
   def _json_dumps(self, obj):
     if self._is_debug():
       return json.dumps(obj, indent=2)
-    return json.dumps(obj)
+    return json.dumps(obj, separators=(',', ':'))
 
   def _output_facade(self, package_name, data):
     json_str = ''
