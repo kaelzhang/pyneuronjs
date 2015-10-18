@@ -106,7 +106,7 @@ class Neuron(object):
     self._outputted = True
     self._analysis()
 
-    return '\n'.join([
+    return self._get_joiner().join([
       self._output_neuron(),
       self._output_scripts(),
       '<script>',
@@ -114,6 +114,12 @@ class Neuron(object):
       self._output_facades(),
       '</script>'
     ])
+
+  def _get_joiner(self):
+    joiner = ''
+    if self._is_debug():
+      joiner = '\n'
+    return joiner
 
   def _analysis(self):
     # {
@@ -135,32 +141,38 @@ class Neuron(object):
         self._combos.append(combo)
 
   def _clean_combo(self, combo):
-    combo = list(combo)
+    cleaned = []
 
-    def clean(item):
-      (name, version) = parse_package_id(item)
+    def select(name, version):
+      cleaned.append((name, version))
       package_id = Neuron.package_id(name, version)
-
-      if package_id in self._loaded:
-        return False
       self._loaded.append(package_id)
+
+    for item in combo:
+      (name, version) = Neuron.parse_package_id(item)
 
       # prevent useless package
       # and prevent duplication
       if name not in self._packages:
-        return False
+        continue
+      versions = self._packages[name]
 
-      if version not in self._packages[name]:
-        return False
-
-      self._packages[name].remove(version)
-      if not len(self._packages[name]):
+      # 'a' -> all versions of 'a'
+      if version == '*':
+        for v in versions:
+          select(name, v)
         self._packages.pop(name)
+      # 'a@1.0.0' -> only a@1.0.0
+      else:
+        if version not in versions:
+          continue
+        versions.remove(version)
+        select(name, version)
 
-      return (name, version)
-
-    combo = map(clean, combo)
-    return filter(lambda x: x, combo)
+        if not len(versions):
+          self._packages.pop(name)
+    
+    return cleaned
 
   def _output_neuron(self):
     return decorate(self.resolve('neuron.js'), 'js')
@@ -174,7 +186,7 @@ class Neuron(object):
         self._loaded.append(Neuron.package_id(name, version))
         self._decorate_script(output, name, version)
 
-    return '\n'.join(output)
+    return self._get_joiner().join(output)
 
   def _decorate_combos_scripts(self, output):
     for combo in self._combos:
@@ -216,8 +228,8 @@ class Neuron(object):
 
   def _output_config(self):
     config = {
-      'loaded': json.dumps(self._loaded),
-      'graph': json.dumps(self._graph)
+      'loaded': self._json_dumps(self._loaded),
+      'graph': self._json_dumps(self._graph)
     }
 
     for key in Neuron.USER_CONFIGS:
@@ -238,10 +250,15 @@ class Neuron(object):
       for package_name, data in self._facades
     ])
 
+  def _json_dumps(self, obj):
+    if self._is_debug():
+      return json.dumps(obj, indent=2)
+    return json.dumps(obj)
+
   def _output_facade(self, package_name, data):
     json_str = ''
     if data:
-      json_str = ', ' + json.dumps(data)
+      json_str = ', ' + self._json_dumps(data)
     return 'facade(\'%s\'%s);' % (package_name, json_str)
 
   # creates the hash according to the facades

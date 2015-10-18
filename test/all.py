@@ -26,7 +26,7 @@ def resolve(module_ids):
     return _resolve(module_ids)
 
   module_ids = [
-    _resolve(i)
+    _resolve(i).replace('/', '~')
     for i in module_ids
   ]
 
@@ -41,7 +41,6 @@ nr = Neuron(
   resolve=resolve,
   debug=True,
   js_config={
-    'path': '/mod/'
   }
 )
 
