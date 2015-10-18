@@ -39,14 +39,11 @@ nr = Neuron(
   version=version,
   dependency_tree=dependency_tree,
   resolve=resolve,
-  path='mod',
   debug=True,
-  js_config={
-    'path': 'http://localhost:8000/mod'
-  }
+  js_config={}
 )
 
 nr.facade('home')
-nr.combo()
+nr.combo('home', 'b')
 
 print nr.output()

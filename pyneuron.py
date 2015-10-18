@@ -42,7 +42,6 @@ class Neuron(object):
     option_list = [
       ('dependency_tree', {}),
       ('resolve', Neuron._default_resolver),
-      ('path', ''),
       ('debug', False),
       ('version', 0),
       ('cache', None),
@@ -56,14 +55,6 @@ class Neuron(object):
     else:
       self.is_debug = bool(self.debug)
       self._is_debug = self._is_debug_bool
-
-    # /mod  -> mod
-    # mod/  -> mod
-    # /mod/ -> mod 
-    if self.path.startswith('/'):
-      self.path = self.path[1:]
-    if self.path.endswith('/'):
-      self.path = self.path[0:-1]
 
     self._version = str(self.version)
     self._outputted = False
@@ -148,7 +139,7 @@ class Neuron(object):
 
     def clean(item):
       (name, version) = parse_package_id(item)
-      package_id = Neuron.package_id(name, vesion)
+      package_id = Neuron.package_id(name, version)
 
       if package_id in self._loaded:
         return False
@@ -172,7 +163,7 @@ class Neuron(object):
     return filter(lambda x: x, combo)
 
   def _output_neuron(self):
-    return decorate(self.resolve(self.path + '/neuron.js'), 'js')
+    return decorate(self.resolve('neuron.js'), 'js')
 
   def _output_scripts(self):
     output = []
