@@ -106,7 +106,17 @@ class Neuron(object):
     self._outputted = True
     self._analysis()
 
-    return self._get_joiner().join([
+    joiner = self._get_joiner()
+
+    if self._is_debug():
+      return joiner.join([
+        self._output_neuron(),
+        '<script>',
+        self._output_facades(),
+        '</script>'
+      ])
+
+    return joiner.join([
       self._output_neuron(),
       self._output_scripts(),
       '<script>',
@@ -186,7 +196,7 @@ class Neuron(object):
         self._loaded.append(Neuron.package_id(name, version))
         self._decorate_script(output, name, version)
 
-    return self._get_joiner().join(output)
+    return ''.join(output)
 
   def _decorate_combos_scripts(self, output):
     for combo in self._combos:
