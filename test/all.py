@@ -35,7 +35,7 @@ def resolve(module_ids):
 def _resolve(module_id):
   return '/mod' + '/' + module_id.replace('@', '/')
 
-nr = Neuron(
+neuron = Neuron(
   version=version,
   dependency_tree=dependency_tree,
   resolve=resolve,
@@ -44,9 +44,12 @@ nr = Neuron(
   }
 )
 
-nr.facade('home', {
+neuron.facade('home', {
   'a': 1
 })
-nr.combo('home', 'b')
+neuron.combo('home', 'b@0.1.0', 'c')
 
-print nr.output()
+# neuron.css('home', '/style.css')
+
+# -> <link rel="" href="//s1.xhscdn.com/">
+print neuron.output()
