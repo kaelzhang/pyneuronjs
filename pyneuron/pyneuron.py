@@ -3,8 +3,6 @@
 """
 """
 
-__all__ = ['Neuron', 'decorate']
-
 import json
 import hashlib
 
