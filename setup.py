@@ -9,20 +9,19 @@ def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
 setup(
-    name = "an_example_pypi_project",
-    version = "0.0.5",
-    author = "Andrew Carter",
-    author_email = "andrewjcarter@gmail.com",
-    description = ("An demonstration of how to create, document, and publish "
-				   "to the cheese shop a5 pypi.org."),
-    license = "BSD",
-    keywords = "example documentation tutorial",
-    url = "http://packages.python.org/an_example_pypi_project",
-    packages=['an_example_pypi_project', 'tests'],
-    long_description=read('README'),
+    name = 'pyneuron',
+    packages = ['pyneuron', 'test'],
+    version = '0.0.1',
+    author = 'Kael Zhang',
+    author_email = 'i@kael.me',
+    description = ('The python middleware for neuron.js'),
+    license = 'MIT',
+    keywords = 'neuron.js middleware javascript loader facade',
+    url = 'https://github.com/neuron-js/pyneuron',
+    long_description=read('README.md'),
     classifiers=[
-        "Development Status :: 3 - Alpha",
-        "Topic :: Utilities",
-        "License :: OSI Approved :: BSD License",
+        'Development Status :: 3 - Alpha',
+        'Topic :: Utilities',
+        'License :: OSI Approved :: BSD License',
     ],
 )
