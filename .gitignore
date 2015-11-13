@@ -1,3 +1,9 @@
+# pypi
+dist/
+pyneuronjs.egg-info/
+pyneuron.egg-info
+*.pyc
+
 # Numerous always-ignore extensions
 *.bak
 *.patch

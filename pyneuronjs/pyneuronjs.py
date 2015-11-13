@@ -186,7 +186,7 @@ class Neuron(object):
         return cleaned
 
     def _output_neuron(self):
-        return decorate(self.resolve('neuron.js'), 'js')
+        return Neuron.decorate(self.resolve('neuron.js'), 'js')
 
     def _output_scripts(self):
         output = []
@@ -206,7 +206,7 @@ class Neuron(object):
                 for package in combo
             ]
 
-            script = decorate(
+            script = Neuron.decorate(
                 self.resolve(joined_combo),
                 'js',
                 'async'
@@ -214,7 +214,7 @@ class Neuron(object):
             output.append(script)
 
     def _decorate_script(self, output, name, version):
-        script = decorate(
+        script = Neuron.decorate(
             self.resolve(Neuron.module_id(name, version)),
             'js',
             'async'
@@ -289,6 +289,11 @@ class Neuron(object):
             return (package_id, '*')
 
         return (splitted[0], splitted[1])
+
+    @staticmethod
+    def decorate(url, type_, extra=''):
+        extra = ' ' + extra if extra else ''
+        return _TEMPLATE.get(type_) % (extra, url)
 
 
 class Walker(object):
@@ -406,8 +411,3 @@ _TEMPLATE = {
     'css': '<link%s rel="stylesheet" href="%s">',
     'other': '<img%s alt="" src="%s"/>'
 }
-
-
-def decorate(url, type_, extra=''):
-    extra = ' ' + extra if extra else ''
-    return _TEMPLATE.get(type_) % (extra, url)
