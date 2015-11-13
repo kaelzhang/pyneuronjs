@@ -39,17 +39,21 @@ def beforecssoutput(fn):
 
 class Neuron(object):
 
-    def __init__(self, **options):
-        option_list = [
-            ('dependency_tree', {}),
-            ('resolve', Neuron._default_resolver),
-            ('debug', False),
-            ('version', 0),
-            ('cache', None),
-            ('js_config', {})
-        ]
-        for key, default in option_list:
-            setattr(self, key, options.get(key) or default)
+    def __init__(
+        self,
+        dependency_tree = {},
+        resolve = Neuron._default_resolver,
+        debug = False,
+        version = 0,
+        cache = None,
+        js_config = {}
+    ):
+        self.dependency_tree    = dependency_tree
+        self.resolve            = resolve
+        self.debug              = debug
+        self.version            = version
+        self.cache              = cache
+        self.js_config          = js_config
 
         if hasattr(self.debug, '__call__'):
             self._is_debug = self._is_debug_fn
@@ -173,6 +177,7 @@ class Neuron(object):
                 for v in versions:
                     select(name, v)
                 self._packages.pop(name)
+
             # 'a@1.0.0' -> only a@1.0.0
             else:
                 if version not in versions:
@@ -201,6 +206,12 @@ class Neuron(object):
 
     def _decorate_combos_scripts(self, output):
         for combo in self._combos:
+            # should not combo a single file
+            if len(combo) == 1:
+                (name, version) = combo[0]
+                self._decorate_script(output, name, version)
+                continue
+
             joined_combo = [
                 Neuron.module_id(*package)
                 for package in combo
