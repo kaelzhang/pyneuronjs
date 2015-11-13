@@ -1,1 +1,1 @@
-from pyneuron import Neuron
+from pyneuronjs import Neuron
