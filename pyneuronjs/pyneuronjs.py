@@ -1,67 +1,46 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-"""
-"""
+# 
+
+__author__ = 'Kael Zhang'
 
 import json
 import hashlib
 
-# Memoize
-def memoize(fn):
-    def method(self, *args):
-        # prevent saving cache for empty facades
-        if not self.cache or not len(self.facades):
-            return fn(self, *args)
+from walker import Walker
 
-        hash_id = self._get_identifier_hash()
-        if self.cache.has(hash_id):
-            return self.cache.get(hash_id)
-
-        result = fn(self, *args)
-        self.cache.save(hash_id, result)
-        return result
-
-    return method
-
-
-def beforeoutput(fn):
-    def method(self, *args):
-        if self._outputted:
-            return ''
-        return fn(self, *args)
-
-    return method
-
-
-def beforecssoutput(fn):
-    return fn
+ASSET_TEMPLATE = {
+    'js': '<script%s src="%s"></script>',
+    'css': '<link%s rel="stylesheet" href="%s">',
+    'other': '<img%s alt="" src="%s"/>'
+}
 
 
 class Neuron(object):
+    """
+    """
 
-    def __init__(
-        self,
-        dependency_tree = {},
-        resolve = Neuron._default_resolver,
-        debug = False,
-        version = 0,
-        cache = None,
-        js_config = {}
-    ):
-        self.dependency_tree    = dependency_tree
-        self.resolve            = resolve
-        self.debug              = debug
-        self.version            = version
-        self.cache              = cache
-        self.js_config          = js_config
+    def __init__(self,
+                 dependency_tree = {},
+                 resolve         = Neuron._default_resolver,
+                 debug           = False,
+                 version         = 0,
+                 cache           = None,
+                 js_config       = {}):
 
-        if hasattr(self.debug, '__call__'):
+        self.dependency_tree     = dependency_tree
+        self.resolve             = resolve
+        self.debug               = debug
+        self.version             = str(version)
+
+        # TODO
+        self.cache               = cache
+        self.js_config           = js_config
+
+        if hasattr(self.debug, b'__call__'):
             self._is_debug = self._is_debug_fn
         else:
             self.is_debug = bool(self.debug)
             self._is_debug = self._is_debug_bool
 
-        self._version = str(self.version)
         self._outputted = False
         self._facades = []
         self._loaded = []
@@ -304,121 +283,4 @@ class Neuron(object):
     @staticmethod
     def decorate(url, type_, extra=''):
         extra = ' ' + extra if extra else ''
-        return _TEMPLATE.get(type_) % (extra, url)
-
-
-class Walker(object):
-
-    # @param {dict} tree
-    # {
-    #   "a": {
-    #     "*": {
-    #       "dependencies": {
-    #         "b": "*"
-    #       }
-    #     }
-    #   },
-    #   "b": {
-    #     "*": {}
-    #   }
-    # }
-    def __init__(self, tree):
-        self._tree = tree
-        self.guid = 0
-
-    # @param {list} entries
-    # @param {list} host_list where the result will be appended to
-    def look_up(self, facades):
-        self.parsed = []
-        self.selected = {}
-        self.map = {}
-
-        facade_node = {}
-        self.graph = {
-            '_': facade_node
-        }
-        for package_id, data in facades:
-            (name, version) = Neuron.parse_package_id(package_id)
-            self._walk_down(name, version, version, facade_node)
-
-        return (self.selected, self.graph)
-
-    def _guid(self):
-        uid = self.guid
-        self.guid += 1
-        return uid
-
-    # walk down
-    # @param {list} entry list of package names
-    # @param {dict} tree the result tree to extend
-    # @param {list} parsed the list to store parsed entries
-    def _walk_down(self, name, range_, version, dependency_node):
-        # if the node is already parsed,
-        # sometimes we still need to add the dependency to the parent node
-        package_range_id = Neuron.package_id(name, range_)
-        package_id = Neuron.package_id(name, version)
-        (node, index) = self._get_graph_node(package_id, version)
-        dependency_node[package_range_id] = index
-
-        if package_id in self.parsed:
-            return
-        self.parsed.append(package_id)
-
-        self._select(name, version)
-
-        # Walk dependencies
-        dependencies = self._get_dependencies(name, version)
-        if not dependencies:
-            return
-
-        current_dependency_node = self._get_dependency_node(node)
-        for dep in dependencies:
-            (dep_name, dep_range) = Neuron.parse_package_id(dep)
-            dep_version = dependencies[dep]
-            self._walk_down(dep_name, dep_range, dep_version,
-                            current_dependency_node)
-
-    def _get_dependencies(self, name, version):
-        return Walker.access(self._tree, [name, version, 'dependencies'])
-
-    def _select(self, name, version):
-        selected = self.selected
-        if name not in selected:
-            selected[name] = set()
-
-        selected[name].add(version)
-
-    def _get_graph_node(self, package_id, version):
-        if package_id in self.map:
-            index = self.map[package_id]
-            return (self.graph[index], index)
-
-        index = self._guid()
-        self.map[package_id] = index
-        node = [version]
-        self.graph[index] = node
-        return (node, index)
-
-    def _get_dependency_node(self, node):
-        if len(node) == 1:
-            dependency_node = {}
-            node.append(dependency_node)
-            return dependency_node
-        return node[1]
-
-    # Try to deeply access a dict
-    @staticmethod
-    def access(obj, keys, default=None):
-        ret = obj
-        for key in keys:
-            if type(ret) is not dict or key not in ret:
-                return default
-            ret = ret[key]
-        return ret
-
-
-_TEMPLATE = {
-    'js': '<script%s src="%s"></script>',
-    'css': '<link%s rel="stylesheet" href="%s">',
-    'other': '<img%s alt="" src="%s"/>'
-}
+        return ASSET_TEMPLATE.get(type_) % (extra, url)

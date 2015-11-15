@@ -1,5 +1,7 @@
+
 import os
 from setuptools import setup
+from pyneuronjs import __version__
 
 # Utility function to read the README file.  
 # Used for the long_description.  It's nice, because now 1) we have a top level
@@ -11,17 +13,17 @@ def read(fname):
 setup(
     name = 'pyneuronjs',
     packages = ['pyneuronjs', 'test'],
-    version = '0.0.1',
+    version = __version__,
     author = 'Kael Zhang',
     author_email = 'i@kael.me',
     description = ('The python middleware for neuron.js'),
     license = 'MIT',
     keywords = 'neuron.js middleware javascript loader facade',
-    url = 'https://github.com/neuron-js/pyneuron',
+    url = 'https://github.com/kaelzhang/pyneuronjs',
     long_description=read('README.md'),
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Topic :: Utilities',
-        'License :: OSI Approved :: BSD License',
+        'License :: OSI Approved :: MIT License',
     ],
 )

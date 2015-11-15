@@ -1,8 +1,11 @@
 # pypi
 dist/
 pyneuronjs.egg-info/
-pyneuron.egg-info
+pyneuron.egg-info/
 *.pyc
+
+# pyneuronjs dev
+p.sh
 
 # Numerous always-ignore extensions
 *.bak
