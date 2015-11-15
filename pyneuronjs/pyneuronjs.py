@@ -6,6 +6,8 @@ import json
 import hashlib
 
 from walker import Walker
+import tools
+import module
 
 ASSET_TEMPLATE = {
     'js': '<script%s src="%s"></script>',
@@ -20,11 +22,14 @@ class Neuron(object):
 
     def __init__(self,
                  dependency_tree = {},
-                 resolve         = Neuron._default_resolver,
+                 resolve         = None,
                  debug           = False,
                  version         = 0,
                  cache           = None,
                  js_config       = {}):
+
+        if not resolve:
+            resolve = Neuron._default_resolver
 
         self.dependency_tree     = dependency_tree
         self.resolve             = resolve
@@ -59,7 +64,7 @@ class Neuron(object):
     def _default_resolver(pathname):
         return '/' + pathname
 
-    @beforeoutput
+    @tools.beforeoutput
     def facade(self, module_id, data=None):
         self._facades.append(
             (module_id, data)
@@ -69,7 +74,7 @@ class Neuron(object):
         return ''
 
     # defines which packages should be comboed
-    @beforeoutput
+    @tools.beforeoutput
     def combo(self, *package_names):
         # If debug, combos will not apply
         if not self._is_debug() and len(package_names) > 1:
@@ -77,7 +82,7 @@ class Neuron(object):
         return ''
 
     # TODO
-    @beforecssoutput
+    @tools.beforecssoutput
     def css(self):
         return ''
 
@@ -85,7 +90,7 @@ class Neuron(object):
     def output_css(self):
         return ''
 
-    @memoize
+    @tools.memoize
     def output(self):
         self._outputted = True
         self._analysis()
@@ -139,11 +144,11 @@ class Neuron(object):
 
         def select(name, version):
             cleaned.append((name, version))
-            package_id = Neuron.package_id(name, version)
+            package_id = module.package_id(name, version)
             self._loaded.append(package_id)
 
         for item in combo:
-            (name, version) = Neuron.parse_package_id(item)
+            (name, version) = module.parse_package_id(item)
 
             # prevent useless package
             # and prevent duplication
@@ -178,7 +183,7 @@ class Neuron(object):
 
         for name in self._packages:
             for version in self._packages[name]:
-                self._loaded.append(Neuron.package_id(name, version))
+                self._loaded.append(module.package_id(name, version))
                 self._decorate_script(output, name, version)
 
         return ''.join(output)
@@ -192,7 +197,7 @@ class Neuron(object):
                 continue
 
             joined_combo = [
-                Neuron.module_id(*package)
+                module.module_id(*package)
                 for package in combo
             ]
 
@@ -205,25 +210,11 @@ class Neuron(object):
 
     def _decorate_script(self, output, name, version):
         script = Neuron.decorate(
-            self.resolve(Neuron.module_id(name, version)),
+            self.resolve(module.module_id(name, version)),
             'js',
             'async'
         )
         output.append(script)
-
-    # format to module id
-    @staticmethod
-    def module_id(name, version, path=''):
-        # 'a', '*', '' -> 'a@*/a.js'
-        # 'a', '*', '/' -> 'a@*/a.js'
-        if not path or path == '/':
-            path = '/' + name + '.js'
-
-        return Neuron.package_id(name, version) + path
-
-    @staticmethod
-    def package_id(name, version):
-        return name + '@' + version
 
     USER_CONFIGS = ['path', 'resolve']
 
@@ -271,14 +262,6 @@ class Neuron(object):
         m = hashlib.sha1()
         m.update(s)
         return m.hexdigest()[0:8]
-
-    @staticmethod
-    def parse_package_id(package_id):
-        splitted = package_id.split('@')
-        if len(splitted) == 1:
-            return (package_id, '*')
-
-        return (splitted[0], splitted[1])
 
     @staticmethod
     def decorate(url, type_, extra=''):

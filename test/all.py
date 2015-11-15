@@ -2,7 +2,7 @@ from env import ABSPATH
 import os
 import json
 
-from pyneuron import Neuron
+from pyneuronjs import Neuron
 
 dependency_tree = {}
 
@@ -39,7 +39,7 @@ neuron = Neuron(
   version=version,
   dependency_tree=dependency_tree,
   resolve=resolve,
-  debug=True,
+  debug=False,
   js_config={
   }
 )
