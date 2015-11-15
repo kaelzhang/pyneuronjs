@@ -1,3 +1,5 @@
+# Adds current project into the python PATH
+
 import os
 __dirname = os.path.dirname(os.path.realpath(__file__))
 
@@ -10,4 +12,5 @@ ABSPATH = path_join(__dirname, '../')
 
 import json
 import sys
+
 sys.path.append(ABSPATH)
