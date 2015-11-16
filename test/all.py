@@ -49,7 +49,7 @@ neuron = Neuron(
 neuron.facade('home/a.js', {
   'a': 1
 })
-neuron.combo('home', 'b@0.1.0', 'c')
+# neuron.combo('home', 'b@0.1.0', 'c')
 
 # neuron.css('home', '/style.css')
 

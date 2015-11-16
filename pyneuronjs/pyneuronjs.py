@@ -48,7 +48,7 @@ class Neuron(object):
 
         self._outputted = False
         self._facades = []
-        self._loaded = []
+        self._loaded = set([])
 
         # list.<tuple>
         self._combos = []
@@ -124,8 +124,8 @@ class Neuron(object):
 
         # _packages:
         # {
-        #   'a': set(['1.1.0', '2.0.0']),
-        #   'b': set(['0.0.1'])
+        #   'a': set(['(1.1.0', ''), ('2.0.0', '')]),
+        #   'b': set([('0.0.1', '')])
         # }
 
         # _graph:
@@ -147,34 +147,35 @@ class Neuron(object):
     def _clean_combo(self, combo):
         cleaned = []
 
-        def select(name, version):
-            cleaned.append((name, version))
+        def select(name, version, path):
+            cleaned.append((name, version, path))
             package_id = module.package_id(name, version)
-            self._loaded.append(package_id)
+            self._loaded.add(package_id)
 
         for item in combo:
             name, version, path = module.parse_module_id(item)
 
-            # prevent useless package
-            # and prevent duplication
+            # - prevent useless package
+            # - removes already-comboed packages from self._packages
+            #       to prevent duplication
             if name not in self._packages:
                 continue
-            versions = self._packages[name]
+            version_paths = self._packages[name]
 
             # 'a' -> all versions of 'a'
             if version == '*':
-                for v in versions:
-                    select(name, v)
+                for v, p in version_paths:
+                    select(name, v, p)
                 self._packages.pop(name)
 
             # 'a@1.0.0' -> only a@1.0.0
             else:
-                if version not in versions:
+                if (version, path) not in version_paths:
                     continue
-                versions.remove(version)
-                select(name, version)
+                version_paths.remove((version, path))
+                select(name, version, path)
 
-                if not len(versions):
+                if not len(version_paths):
                     self._packages.pop(name)
 
         return cleaned
@@ -187,9 +188,9 @@ class Neuron(object):
         self._decorate_combos_scripts(output)
 
         for name in self._packages:
-            for version in self._packages[name]:
-                self._loaded.append(module.package_id(name, version))
-                self._decorate_script(output, name, version)
+            for version, path in self._packages[name]:
+                self._loaded.add(module.package_id(name, version))
+                self._decorate_script(output, (name, version, path))
 
         return ''.join(output)
 
@@ -197,8 +198,7 @@ class Neuron(object):
         for combo in self._combos:
             # should not combo a single file
             if len(combo) == 1:
-                name, version = combo[0]
-                self._decorate_script(output, name, version)
+                self._decorate_script(output, combo[0])
                 continue
 
             joined_combo = [
@@ -213,9 +213,9 @@ class Neuron(object):
             )
             output.append(script)
 
-    def _decorate_script(self, output, name, version):
+    def _decorate_script(self, output, module_tuple):
         script = Neuron.decorate(
-            self.resolve(module.module_id(name, version)),
+            self.resolve(module.module_id(*module_tuple)),
             'js',
             'async'
         )
@@ -225,7 +225,7 @@ class Neuron(object):
 
     def _output_config(self):
         config = {
-            'loaded': self._json_dumps(self._loaded),
+            'loaded': self._json_dumps(list(self._loaded)),
             'graph': self._json_dumps(self._graph)
         }
 
