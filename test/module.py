@@ -11,7 +11,7 @@ class TestModuleParser(unittest.TestCase):
 
     def test_parse_module_id_name(self):
         id = 'jquery'
-        (name, version, path) = module.parse_module_id(id)
+        name, version, path = module.parse_module_id(id)
 
         self.assertEqual(name, 'jquery')
         self.assertEqual(version, '*')
@@ -19,7 +19,7 @@ class TestModuleParser(unittest.TestCase):
 
     def test_parse_module_id_name_version(self):
         id = 'jquery@1.0.0'
-        (name, version, path) = module.parse_module_id(id)
+        name, version, path = module.parse_module_id(id)
 
         self.assertEqual(name, 'jquery')
         self.assertEqual(version, '1.0.0')
@@ -27,14 +27,14 @@ class TestModuleParser(unittest.TestCase):
 
     def test_parse_module_id_name_version_path(self):
         id = 'jquery@1.0.0/a.js'
-        (name, version, path) = module.parse_module_id(id)
+        name, version, path = module.parse_module_id(id)
 
         self.assertEqual(name, 'jquery')
         self.assertEqual(version, '1.0.0')
         self.assertEqual(path, '/a.js')
 
         id = 'jquery@1.0.0/'
-        (name, version, path) = module.parse_module_id(id)
+        name, version, path = module.parse_module_id(id)
 
         self.assertEqual(name, 'jquery')
         self.assertEqual(version, '1.0.0')

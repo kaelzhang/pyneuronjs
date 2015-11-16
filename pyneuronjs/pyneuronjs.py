@@ -121,11 +121,16 @@ class Neuron(object):
         return joiner
 
     def _analysis(self):
+
+        # _packages:
         # {
         #   'a': set(['1.1.0', '2.0.0']),
         #   'b': set(['0.0.1'])
         # }
-        (self._packages, self._graph) = self._walker.look_up(self._facades)
+
+        # _graph:
+        # neuron.config.graph for javascript
+        self._packages, self._graph = self._walker.look_up(self._facades)
 
         combos = self._combos
         if not len(combos):
@@ -148,7 +153,7 @@ class Neuron(object):
             self._loaded.append(package_id)
 
         for item in combo:
-            (name, version, path) = module.parse_module_id(item)
+            name, version, path = module.parse_module_id(item)
 
             # prevent useless package
             # and prevent duplication
@@ -192,7 +197,7 @@ class Neuron(object):
         for combo in self._combos:
             # should not combo a single file
             if len(combo) == 1:
-                (name, version) = combo[0]
+                name, version = combo[0]
                 self._decorate_script(output, name, version)
                 continue
 

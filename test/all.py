@@ -16,7 +16,7 @@ try:
   dependency_json = open(dependency_file).read()
   dependency_tree = json.loads(dependency_json)
 except Exception as e:
-  print e
+  print(e)
 
 version = dependency_tree.get('_version')
 
@@ -54,4 +54,4 @@ neuron.combo('home', 'b@0.1.0', 'c')
 # neuron.css('home', '/style.css')
 
 # -> <link rel="" href="//s1.xhscdn.com/">
-print neuron.output()
+print(neuron.output())

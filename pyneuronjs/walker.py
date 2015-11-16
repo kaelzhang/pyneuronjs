@@ -53,11 +53,13 @@ class Walker(object):
         # sometimes we still need to add the dependency to the parent node
         package_range_id = module.package_id(name, range_)
         package_id = module.package_id(name, version)
-        (node, index) = self._get_graph_node(package_id, version)
+        node, index = self._get_graph_node(package_id, version)
         dependency_node[package_range_id] = index
 
         if package_id in self.parsed:
+            # prevent parsing duplicately.
             return
+
         self.parsed.append(package_id)
 
         self._select(name, version)
@@ -83,6 +85,7 @@ class Walker(object):
             selected[name] = set()
 
         selected[name].add(version)
+
 
     def _get_graph_node(self, package_id, version):
         if package_id in self.map:
