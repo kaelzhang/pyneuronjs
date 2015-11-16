@@ -8,7 +8,9 @@ python:
   - "3.4"
   - "3.5"
 
-script: python test/module.py fast
+script: 
+  - python test/module.py fast
+  - python test/pyneuronjs.py fast
 
 notifications:
   irc: "irc.freenode.org#pyneuronjs"

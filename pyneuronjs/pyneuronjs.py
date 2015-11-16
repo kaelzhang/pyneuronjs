@@ -90,7 +90,7 @@ class Neuron(object):
     def output_css(self):
         return ''
 
-    @tools.memoize
+    @tools.memoize('_get_identifier_hash')
     def output(self):
         self._outputted = True
         self._analysis()
@@ -148,7 +148,7 @@ class Neuron(object):
             self._loaded.append(package_id)
 
         for item in combo:
-            (name, version) = module.parse_package_id(item)
+            (name, version, path) = module.parse_module_id(item)
 
             # prevent useless package
             # and prevent duplication

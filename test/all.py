@@ -1,3 +1,5 @@
+#
+
 from env import ABSPATH
 import os
 import json
@@ -13,7 +15,7 @@ dependency_file = os.path.normpath(
 try:
   dependency_json = open(dependency_file).read()
   dependency_tree = json.loads(dependency_json)
-except Exception, e:
+except Exception as e:
   print e
 
 version = dependency_tree.get('_version')
