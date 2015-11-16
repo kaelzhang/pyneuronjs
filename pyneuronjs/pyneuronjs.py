@@ -1,4 +1,4 @@
-# 
+#
 
 __author__ = 'Kael Zhang'
 
@@ -254,7 +254,7 @@ class Neuron(object):
         return 'facade(\'%s\'%s);' % (package_name, json_str)
 
     # creates the hash according to the facades
-    def _get_identifier_hash():
+    def _get_identifier_hash(self):
         s = 'pyneuron:' + self.version + ':' + ','.join([
             package_name for package_name, data in self._facades.sort()
         ])

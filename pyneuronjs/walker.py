@@ -2,6 +2,7 @@
 
 import module
 
+
 class Walker(object):
 
     # @param {dict} tree
