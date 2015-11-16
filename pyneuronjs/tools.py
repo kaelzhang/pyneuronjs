@@ -29,7 +29,7 @@ def memoize(cache_key_getter):
     return decorator
 
 
-def before_analyze(fn):
+def before_analysis(fn):
     @functools.wraps(fn)
     def method(self, *args):
         if self._analyzed:

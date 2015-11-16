@@ -63,7 +63,7 @@ class Neuron(object):
     def _default_resolver(pathname):
         return '/' + pathname
 
-    @tools.before_analyze
+    @tools.before_analysis
     def facade(self, module_id, data=None):
         self._facades.append(
             (module_id, data)
@@ -73,22 +73,26 @@ class Neuron(object):
         return ''
 
     # defines which packages should be comboed
-    @tools.before_analyze
+    @tools.before_analysis
     def combo(self, *package_names):
         # If debug, combos will not apply
         if not self._is_debug() and len(package_names) > 1:
             self._combos.append(package_names)
         return ''
 
-    # TODO
-    @tools.before_analyze
+    @tools.before_analysis
     def css(self, css_module):
         self._csses.add(css_module)
         return ''
 
-    # TODO
     def output_css(self):
-        return ''
+        return self._get_joiner().join([
+            Neuron.decorate(
+                self.resolve(module.normalize_id(id)),
+                'css'
+            )
+            for id in self._csses
+        ])
 
     @tools.memoize('_get_identifier_hash')
     def output(self):
@@ -118,7 +122,7 @@ class Neuron(object):
         return joiner
 
     # prevent duplicated analysis
-    @tools.before_analyze
+    @tools.before_analysis
     def analyze(self):
         self._analyzed = True
 
