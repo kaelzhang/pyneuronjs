@@ -40,8 +40,13 @@ class Neuron(object):
             self.is_debug = bool(self.debug)
             self._is_debug = self._is_debug_bool
 
-        self._outputted = False
+        self._analyzed = False
+
+        # allow a facade with several different data
         self._facades = []
+
+        # a single css file should not be loaded more than once
+        self._csses = set([])
         self._loaded = set([])
 
         # list.<tuple>
@@ -58,7 +63,7 @@ class Neuron(object):
     def _default_resolver(pathname):
         return '/' + pathname
 
-    @tools.beforeoutput
+    @tools.before_analyze
     def facade(self, module_id, data=None):
         self._facades.append(
             (module_id, data)
@@ -68,7 +73,7 @@ class Neuron(object):
         return ''
 
     # defines which packages should be comboed
-    @tools.beforeoutput
+    @tools.before_analyze
     def combo(self, *package_names):
         # If debug, combos will not apply
         if not self._is_debug() and len(package_names) > 1:
@@ -76,8 +81,9 @@ class Neuron(object):
         return ''
 
     # TODO
-    @tools.beforecssoutput
-    def css(self):
+    @tools.before_analyze
+    def css(self, css_module):
+        self._csses.add(css_module)
         return ''
 
     # TODO
@@ -86,9 +92,6 @@ class Neuron(object):
 
     @tools.memoize('_get_identifier_hash')
     def output(self):
-        self._outputted = True
-        self._analysis()
-
         joiner = self._get_joiner()
 
         if self._is_debug():
@@ -114,7 +117,10 @@ class Neuron(object):
             joiner = '\n'
         return joiner
 
-    def _analysis(self):
+    # prevent duplicated analysis
+    @tools.before_analyze
+    def analyze(self):
+        self._analyzed = True
 
         # _packages:
         # {

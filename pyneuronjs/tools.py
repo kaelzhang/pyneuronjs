@@ -29,16 +29,10 @@ def memoize(cache_key_getter):
     return decorator
 
 
-def beforeoutput(fn):
+def before_analyze(fn):
     @functools.wraps(fn)
     def method(self, *args):
-        if self._outputted:
+        if self._analyzed:
             return ''
         return fn(self, *args)
-
     return method
-
-
-def beforecssoutput(fn):
-    # @functools.wraps(fn)
-    return fn
