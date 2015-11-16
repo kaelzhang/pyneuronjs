@@ -1,3 +1,5 @@
+
+
 # Memoize the result of the function
 def memoize(fn):
     def method(self, *args):

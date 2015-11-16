@@ -9,14 +9,14 @@ import re
 def module_id(name, version, path=''):
     # 'a', '*', '' -> 'a@*/a.js'
     # 'a', '*', '/' -> 'a@*/a.js'
-    if not path or path == b'/':
-        path = b'/' + name + b'.js'
+    if not path or path == '/':
+        path = '/' + name + '.js'
 
     return package_id(name, version) + path
 
 
 def package_id(name, version):
-    return name + b'@' + version
+    return name + '@' + version
 
 
 REGEX_MODULE_ID = re.compile(
@@ -34,13 +34,13 @@ REGEX_MODULE_ID = re.compile(
 def parse_module_id(id):
     # there will always a match
     m = re.match(REGEX_MODULE_ID, id)
-    path = m.group(3) or b''
+    path = m.group(3) or ''
 
-    if path == b'/':
-        path = b''
+    if path == '/':
+        path = ''
 
     return (
         m.group(1),
         # version default to '*'
-        m.group(2) or b'*',
+        m.group(2) or '*',
         path)

@@ -5,7 +5,7 @@ __author__ = 'Kael Zhang'
 import json
 import hashlib
 
-from walker import Walker
+from .walker import Walker
 import tools
 import module
 

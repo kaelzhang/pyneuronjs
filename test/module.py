@@ -10,35 +10,35 @@ import pyneuronjs.module as module
 class TestModuleParser(unittest.TestCase):
 
     def test_parse_module_id_name(self):
-        id = b'jquery'
+        id = 'jquery'
         (name, version, path) = module.parse_module_id(id)
 
-        self.assertEqual(name, b'jquery')
-        self.assertEqual(version, b'*')
-        self.assertEqual(path, b'')
+        self.assertEqual(name, 'jquery')
+        self.assertEqual(version, '*')
+        self.assertEqual(path, '')
 
     def test_parse_module_id_name_version(self):
-        id = b'jquery@1.0.0'
+        id = 'jquery@1.0.0'
         (name, version, path) = module.parse_module_id(id)
 
-        self.assertEqual(name, b'jquery')
-        self.assertEqual(version, b'1.0.0')
-        self.assertEqual(path, b'')
+        self.assertEqual(name, 'jquery')
+        self.assertEqual(version, '1.0.0')
+        self.assertEqual(path, '')
 
     def test_parse_module_id_name_version_path(self):
-        id = b'jquery@1.0.0/a.js'
+        id = 'jquery@1.0.0/a.js'
         (name, version, path) = module.parse_module_id(id)
 
-        self.assertEqual(name, b'jquery')
-        self.assertEqual(version, b'1.0.0')
-        self.assertEqual(path, b'/a.js')
+        self.assertEqual(name, 'jquery')
+        self.assertEqual(version, '1.0.0')
+        self.assertEqual(path, '/a.js')
 
-        id = b'jquery@1.0.0/'
+        id = 'jquery@1.0.0/'
         (name, version, path) = module.parse_module_id(id)
 
-        self.assertEqual(name, b'jquery')
-        self.assertEqual(version, b'1.0.0')
-        self.assertEqual(path, b'')
+        self.assertEqual(name, 'jquery')
+        self.assertEqual(version, '1.0.0')
+        self.assertEqual(path, '')
 
     def test_module_id(self):
         id = module.module_id('jquery', '*')
