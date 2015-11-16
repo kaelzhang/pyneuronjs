@@ -15,6 +15,10 @@ def module_id(name, version, path=''):
     return package_id(name, version) + path
 
 
+def normalize_id(id):
+    return module_id(*parse_module_id(id))
+
+
 def package_id(name, version):
     return name + '@' + version
 
