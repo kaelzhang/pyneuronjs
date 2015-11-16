@@ -9,12 +9,6 @@ from .walker import Walker
 import tools
 import module
 
-ASSET_TEMPLATE = {
-    'js': '<script%s src="%s"></script>',
-    'css': '<link%s rel="stylesheet" href="%s">',
-    'other': '<img%s alt="" src="%s"/>'
-}
-
 
 class Neuron(object):
     """
@@ -268,7 +262,13 @@ class Neuron(object):
         m.update(s)
         return m.hexdigest()[0:8]
 
+    ASSET_TEMPLATE = {
+        'js': '<script%s src="%s"></script>',
+        'css': '<link%s rel="stylesheet" href="%s">',
+        'other': '<img%s alt="" src="%s"/>'
+    }
+
     @staticmethod
     def decorate(url, type_, extra=''):
         extra = ' ' + extra if extra else ''
-        return ASSET_TEMPLATE.get(type_) % (extra, url)
+        return Neuron.ASSET_TEMPLATE.get(type_) % (extra, url)
