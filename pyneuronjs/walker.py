@@ -34,7 +34,9 @@ class Walker(object):
             '_': facade_node
         }
         for package_id, data in facades:
-            (name, version, path) = module.parse_module_id(package_id)
+            name, version, path = module.parse_module_id(package_id)
+
+            # If the module id facaded contains path, the path will be ignored
             self._walk_down(name, version, version, facade_node)
 
         return (self.selected, self.graph)
@@ -71,7 +73,7 @@ class Walker(object):
 
         current_dependency_node = self._get_dependency_node(node)
         for dep in dependencies:
-            (dep_name, dep_range, dep_path) = module.parse_module_id(dep)
+            dep_name, dep_range, dep_path = module.parse_module_id(dep)
             dep_version = dependencies[dep]
             self._walk_down(dep_name, dep_range, dep_version,
                             current_dependency_node)

@@ -46,7 +46,7 @@ neuron = Neuron(
   }
 )
 
-neuron.facade('home', {
+neuron.facade('home/a.js', {
   'a': 1
 })
 neuron.combo('home', 'b@0.1.0', 'c')

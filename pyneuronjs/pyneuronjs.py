@@ -243,20 +243,20 @@ class Neuron(object):
 
     def _output_facades(self):
         return '\n'.join([
-            self._output_facade(package_name, data)
-            for package_name, data in self._facades
+            self._output_facade(module_id, data)
+            for module_id, data in self._facades
         ])
+
+    def _output_facade(self, module_id, data):
+        json_str = ''
+        if data:
+            json_str = ', ' + self._json_dumps(data)
+        return 'facade(\'%s\'%s);' % (module_id, json_str)
 
     def _json_dumps(self, obj):
         if self._is_debug():
             return json.dumps(obj, indent=2)
         return json.dumps(obj, separators=(',', ':'))
-
-    def _output_facade(self, package_name, data):
-        json_str = ''
-        if data:
-            json_str = ', ' + self._json_dumps(data)
-        return 'facade(\'%s\'%s);' % (package_name, json_str)
 
     # creates the hash according to the facades
     def _get_identifier_hash(self):
