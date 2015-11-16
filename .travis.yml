@@ -10,7 +10,7 @@ python:
 
 script: 
   - python test/module.py fast
-  - python test/pyneuronjs.py fast
+  # - python test/pyneuronjs.py fast
 
 notifications:
   irc: "irc.freenode.org#pyneuronjs"

@@ -12,7 +12,7 @@ def read(fname):
 
 setup(
     name = 'pyneuronjs',
-    packages = ['pyneuronjs', 'test'],
+    packages = ['pyneuronjs'],
     version = __version__,
     author = 'Kael Zhang',
     author_email = 'i@kael.me',
@@ -25,5 +25,5 @@ setup(
         'Development Status :: 3 - Alpha',
         'Topic :: Utilities',
         'License :: OSI Approved :: MIT License',
-    ],
+    ]
 )
