@@ -1,6 +1,6 @@
 
 import os
-from setuptools import setup
+from setuptools import setup, find_packages
 from pyneuronjs import __version__
 
 # Utility function to read the README file.  
@@ -22,7 +22,10 @@ setup(
     url = 'https://github.com/kaelzhang/pyneuronjs',
     long_description=read('README.md'),
     classifiers=[
-        'Development Status :: 3 - Alpha',
+        'Programming Language :: Python',
+        'Programming Language :: Python :: 2.6',
+        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: Implementation :: PyPy',
         'Topic :: Utilities',
         'License :: OSI Approved :: MIT License',
     ]

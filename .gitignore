@@ -9,6 +9,7 @@ pyneuron.egg-info/
 
 # pyneuronjs dev
 p.sh
+README.rst
 
 # Numerous always-ignore extensions
 *.bak
