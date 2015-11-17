@@ -9,8 +9,7 @@ python:
   - "3.5"
 
 script: 
-  - python test/module.py fast
-  # - python test/pyneuronjs.py fast
+  - bash test.sh
 
 notifications:
   irc: "irc.freenode.org#pyneuronjs"
