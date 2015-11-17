@@ -11,8 +11,8 @@ import module
 
 
 class Neuron(object):
-    """
-    """
+    '''
+    '''
 
     def __init__(self,
                  dependency_tree = {},
