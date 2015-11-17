@@ -1,6 +1,6 @@
 
 import os
-from setuptools import setup, find_packages
+from setuptools import setup
 from pyneuronjs import __version__
 
 # Utility function to read the README file.  
