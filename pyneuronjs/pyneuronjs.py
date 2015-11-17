@@ -126,6 +126,8 @@ class Neuron(object):
     def analyze(self):
         self._analyzed = True
 
+        facade_module_ids = [module_id for module_id, data in self._facades]
+
         # _packages:
         # {
         #   'a': set(['(1.1.0', ''), ('2.0.0', '')]),
@@ -134,7 +136,7 @@ class Neuron(object):
 
         # _graph:
         # neuron.config.graph for javascript
-        self._packages, self._graph = self._walker.look_up(self._facades)
+        self._packages, self._graph = self._walker.look_up(facade_module_ids)
 
         combos = self._combos
         if not len(combos):

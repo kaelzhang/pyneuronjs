@@ -26,6 +26,7 @@ class Walker(object):
     # @param {list} host_list where the result will be appended to
     def look_up(self, facades):
         self.parsed = []
+        facade_node = {}
 
         # `self.selected` has the structure like:
         # {
@@ -34,14 +35,17 @@ class Walker(object):
         #     ])
         # }
         self.selected = {}
-        self.map = {}
 
-        facade_node = {}
+        # see [here](https://github.com/kaelzhang/neuron/blob/master/doc/graph.md)
         self.graph = {
             '_': facade_node
         }
-        for package_id, data in facades:
-            name, version, path = module.parse_module_id(package_id)
+
+        # map to store the index of the dependency node
+        self.index_map = {}
+        
+        for module_id in facades:
+            name, version, path = module.parse_module_id(module_id)
 
             # If the module id facaded contains path, the path will be ignored
             self._walk_down(name, version, version, path, facade_node)
@@ -101,12 +105,12 @@ class Walker(object):
 
 
     def _get_graph_node(self, package_id, version):
-        if package_id in self.map:
-            index = self.map[package_id]
+        if package_id in self.index_map:
+            index = self.index_map[package_id]
             return (self.graph[index], index)
 
         index = self._guid()
-        self.map[package_id] = index
+        self.index_map[package_id] = index
         node = [version]
         self.graph[index] = node
         return (node, index)
