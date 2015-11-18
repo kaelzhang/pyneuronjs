@@ -5,9 +5,9 @@ __author__ = 'Kael Zhang'
 import json
 import hashlib
 
-from .walker import Walker
-import tools
-import module
+from pyneuronjs.walker import Walker
+import pyneuronjs.tools as tools
+import pyneuronjs.module as module
 
 
 class Neuron(object):
@@ -80,16 +80,26 @@ class Neuron(object):
             self._combos.append(package_names)
         return ''
 
-    @tools.before_analysis
-    def css(self, css_module):
+    def css(self, *css_module):
         self._csses.add(css_module)
         return ''
 
     def output_css(self):
         self.analyze()
+
+        def normalize(ids):
+            normalized = [
+                module.normalize_id(id)
+                for id in ids
+            ]
+
+            if len(normalized) == 1:
+                return normalized[0]
+            return normalized
+
         return self._get_joiner().join([
             Neuron.decorate(
-                self.resolve(module.normalize_id(id)),
+                self.resolve(normalize(id)),
                 'css'
             )
             for id in self._csses

@@ -1,3 +1,3 @@
-from .pyneuronjs import Neuron
+from pyneuronjs.main import Neuron
 
 __version__ = '1.1.0'
