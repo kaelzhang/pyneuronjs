@@ -17,11 +17,12 @@ abort() {
 }
 
 
-py=".py"
 files=(module walker)
 for file in ${files[@]}; do
   echo
   log "test" "$file$py"
   echo
-  python "test/$file$py" || abort "test $file$py failed."
+
+  # Test the file as a package, to avoid the python import problem in a mess
+  python -m "test.$file" || abort "test $file$py failed."
 done

@@ -54,6 +54,8 @@ neuron.facade('home/a.js', {
 neuron.css('home/style.css')
 
 neuron.analyze()
+neuron.analyze()
+neuron.analyze()
 
 # -> <link rel="" href="//s1.xhscdn.com/">
 print(neuron.output())

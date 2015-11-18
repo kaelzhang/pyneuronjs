@@ -86,6 +86,7 @@ class Neuron(object):
         return ''
 
     def output_css(self):
+        self.analyze()
         return self._get_joiner().join([
             Neuron.decorate(
                 self.resolve(module.normalize_id(id)),
@@ -96,6 +97,7 @@ class Neuron(object):
 
     @tools.memoize('_get_identifier_hash')
     def output(self):
+        self.analyze()
         joiner = self._get_joiner()
 
         if self._is_debug():
