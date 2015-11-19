@@ -16,7 +16,7 @@ abort() {
   printf "\n\033[31mError: $@\033[0m\n\n" && exit 1
 }
 
-
+py='.py'
 files=(module walker)
 for file in ${files[@]}; do
   echo
@@ -24,5 +24,5 @@ for file in ${files[@]}; do
   echo
 
   # Test the file as a package, to avoid the python import problem in a mess
-  python -m "test.$file" || abort "test $file$py failed."
+  python "test/$file$py" || abort "test $file$py failed."
 done

@@ -52,6 +52,7 @@ neuron.facade('home/a.js', {
 # neuron.combo('home', 'b@0.1.0', 'c')
 
 neuron.css('home/style.css')
+neuron.css('b/style.css', 'c/style.css')
 
 neuron.analyze()
 neuron.analyze()

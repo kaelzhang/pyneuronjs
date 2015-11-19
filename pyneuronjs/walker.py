@@ -1,7 +1,7 @@
 # Walker to walk the dependency tree
 
-import pyneuronjs.module as module
 
+from . import module
 
 class Walker(object):
 

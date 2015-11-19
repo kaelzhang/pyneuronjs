@@ -1,13 +1,14 @@
 #
 
+
 __author__ = 'Kael Zhang'
 
 import json
 import hashlib
 
-from pyneuronjs.walker import Walker
-import pyneuronjs.tools as tools
-import pyneuronjs.module as module
+from .walker import Walker
+from . import tools
+from . import module
 
 
 class Neuron(object):

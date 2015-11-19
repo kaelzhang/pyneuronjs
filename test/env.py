@@ -13,4 +13,5 @@ ABSPATH = path_join(__dirname, '../')
 import json
 import sys
 
-sys.path.append(ABSPATH)
+# insert ABSPATH to the front
+sys.path.insert(0, ABSPATH)
