@@ -74,10 +74,11 @@ class Neuron(object):
         return ''
 
     # defines which packages should be comboed
+    @tools.nodebug
     @tools.before_analysis
     def combo(self, *package_names):
         # If debug, combos will not apply
-        if not self._is_debug() and len(package_names) > 1:
+        if len(package_names) > 1:
             self._combos.append(package_names)
         return ''
 
@@ -109,17 +110,8 @@ class Neuron(object):
     @tools.memoize('_get_identifier_hash')
     def output(self):
         self.analyze()
-        joiner = self._get_joiner()
 
-        if self._is_debug():
-            return joiner.join([
-                self._output_neuron(),
-                '<script>',
-                self._output_facades(),
-                '</script>'
-            ])
-
-        return joiner.join([
+        return self._get_joiner().join([
             self._output_neuron(),
             self._output_scripts(),
             '<script>',
@@ -202,6 +194,7 @@ class Neuron(object):
     def _output_neuron(self):
         return Neuron.decorate(self.resolve('neuron.js'), 'js')
 
+    @tools.nodebug
     def _output_scripts(self):
         output = []
         self._decorate_combos_scripts(output)
@@ -246,7 +239,7 @@ class Neuron(object):
         config = {
             'loaded': self._json_dumps(list(self._loaded)),
             'graph': self._json_dumps(self._graph)
-        }
+        } if not self._is_debug() else {}
 
         for key in Neuron.USER_CONFIGS:
             c = self.js_config.get(key)

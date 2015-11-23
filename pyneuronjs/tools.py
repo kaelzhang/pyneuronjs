@@ -37,3 +37,12 @@ def before_analysis(fn):
             return ''
         return fn(self, *args)
     return method
+
+
+def nodebug(fn):
+    @functools.wraps(fn)
+    def method(self, *args):
+        if self._is_debug():
+            return ''
+        return fn(self, *args)
+    return method
