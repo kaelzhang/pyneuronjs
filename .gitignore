@@ -3,11 +3,11 @@ __pycache__/
 
 # pypi
 dist/
-pyneuronjs.egg-info/
+neuronjs.egg-info/
 pyneuron.egg-info/
 *.pyc
 
-# pyneuronjs dev
+# neuronjs dev
 p.sh
 README.rst
 

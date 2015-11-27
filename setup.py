@@ -1,7 +1,7 @@
 
 import os
 from setuptools import setup
-from pyneuronjs import __version__
+from neuronjs import __version__
 
 # Utility function to read the README file.  
 # Used for the long_description.  It's nice, because now 1) we have a top level
@@ -11,15 +11,15 @@ def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
 setup(
-    name = 'pyneuronjs',
-    packages = ['pyneuronjs'],
+    name = 'neuronjs',
+    packages = ['neuronjs'],
     version = __version__,
     author = 'Kael Zhang',
     author_email = 'i@kael.me',
     description = ('The python middleware for neuron.js'),
     license = 'MIT',
     keywords = 'neuron.js middleware javascript loader facade',
-    url = 'https://github.com/kaelzhang/pyneuronjs',
+    url = 'https://github.com/kaelzhang/neuronjs',
     long_description=read('README.rst'),
     classifiers=[
         'Programming Language :: Python',

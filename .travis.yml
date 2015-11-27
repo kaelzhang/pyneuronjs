@@ -12,5 +12,5 @@ script:
   - bash test.sh
 
 notifications:
-  irc: "irc.freenode.org#pyneuronjs"
+  irc: "irc.freenode.org#neuronjs"
   on_success: "never"

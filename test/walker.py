@@ -7,7 +7,7 @@ import json
 import os
 
 from env import ABSPATH
-from pyneuronjs.walker import Walker
+from neuronjs.walker import Walker
 
 
 def read_json(filename):

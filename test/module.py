@@ -5,7 +5,7 @@ import unittest
 import sys
 
 from env import ABSPATH
-import pyneuronjs.module as module
+import neuronjs.module as module
 
 
 class TestModuleParser(unittest.TestCase):

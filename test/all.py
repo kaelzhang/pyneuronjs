@@ -4,7 +4,7 @@ from env import ABSPATH
 import os
 import json
 
-from pyneuronjs import Neuron
+from neuronjs import Neuron
 
 dependency_tree = {}
 
