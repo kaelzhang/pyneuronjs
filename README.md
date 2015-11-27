@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.org/kaelzhang/python-neuronjs.svg?branch=master)](https://travis-ci.org/kaelzhang/python-neuronjs)
 
-# neuronjs
+# python-neuronjs
 
 Python utilities and middleware for neuron.js
 
