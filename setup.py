@@ -19,7 +19,7 @@ setup(
     description = ('The python middleware for neuron.js'),
     license = 'MIT',
     keywords = 'neuron.js middleware javascript loader facade',
-    url = 'https://github.com/kaelzhang/neuronjs',
+    url = 'https://github.com/kaelzhang/python-neuronjs',
     long_description=read('README.rst'),
     classifiers=[
         'Programming Language :: Python',

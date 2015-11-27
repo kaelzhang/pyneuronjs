@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/kaelzhang/neuronjs.svg?branch=master)](https://travis-ci.org/kaelzhang/neuronjs)
+[![Build Status](https://travis-ci.org/kaelzhang/python-neuronjs.svg?branch=master)](https://travis-ci.org/kaelzhang/python-neuronjs)
 
 # neuronjs
 
