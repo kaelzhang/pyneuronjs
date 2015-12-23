@@ -49,9 +49,11 @@ to generate the key to cache the output result
 <name>@<version><path>  # for example: 'jquery@2.0.0/jquery.js'
 ```
 
-#### n.facade(entry, data=None)
+#### n.facade(entry, data=None, defer=False)
 
 - **entry** `str` id of the entry module
+- **data** `dict=None` the data of the facade, which will be passed to the entry module.
+- **defer** `bool=False` whether should defer the loading process of the facade. If `True`, the script of the facade and its dependencies will not be loaded at the beginning of the page as much as possible.
 
 Registers a facade entry with `data`. neuronjs will 
 
@@ -67,9 +69,17 @@ Returns `''`
 
 #### n.output()
 
+Outputs neuron.js, neuron initial configurations and the html of script tags.
+
+For most cases, this method should be used in the base template file, see [example](./sample/sample-jinja.html).
+
 Returns `str`
 
 #### n.output_css()
+
+Outputs the html of link elements of csses.
+
+For most cases, this method should be used in the base template file, see [example](./sample/sample-jinja.html).
 
 Returns `str`
 
