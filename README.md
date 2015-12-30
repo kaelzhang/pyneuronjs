@@ -61,9 +61,20 @@ Returns `''`(empty string), so you can use this method in python template
 
 #### n.combo(id...)
 
+Makes packages of ids to combine into a single file.
+
+- id `str` the module id of commonjs module or css module. 
+
+```js
+n.combo('jquery', 'underscore')
+n.combo('app-home/style.css', 'app-user/user.css')
+```
+
 Returns `''`
 
 #### n.css(id)
+
+Registers an css module, and tell neuronjs to output it on the page.
 
 Returns `''`
 
