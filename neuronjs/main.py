@@ -160,8 +160,7 @@ class Neuron(object):
 
         def select(name, version, path):
             cleaned.append((name, version, path))
-            package_id = module.package_id(name, version)
-            self._loaded.add(package_id)
+            self._set_loaded(name, version, path)
 
         for item in combo:
             name, version, path = module.parse_module_id(item)
@@ -201,10 +200,16 @@ class Neuron(object):
 
         for name in self._packages:
             for version, path in self._packages[name]:
-                self._loaded.add(module.package_id(name, version))
+                self._set_loaded(name, version, path)
                 self._decorate_script(output, (name, version, path))
 
         return ''.join(output)
+
+    def _set_loaded(self, name, version, path):
+        if path:
+            self._loaded.add(module.module_id(name, version, path))
+        else:
+            self._loaded.add(module.package_id(name, version))
 
     def _decorate_combos_scripts(self, output):
         for combo in self._combos:

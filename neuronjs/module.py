@@ -34,7 +34,6 @@ REGEX_MODULE_ID = re.compile(
         $""",
     re.X)
 
-
 def parse_module_id(id):
     # there will always a match
     m = re.match(REGEX_MODULE_ID, id)

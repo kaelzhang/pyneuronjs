@@ -41,7 +41,7 @@ neuron = Neuron(
   version=version,
   dependency_tree=dependency_tree,
   resolve=resolve,
-  debug=True,
+  debug=False,
   js_config={
     'path': "'http://a.com/mod'"
   }
