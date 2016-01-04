@@ -108,7 +108,7 @@ class Neuron(object):
         ])
 
     @tools.memoize('_get_identifier_hash')
-    def output(self):
+    def output_scripts(self):
         self.analyze()
 
         return self._get_joiner().join([
@@ -116,6 +116,12 @@ class Neuron(object):
             self._output_scripts(),
             '<script>',
             self._output_config(),
+            '</script>'
+        ])
+
+    def output_facades(self):
+        return self._get_joiner().join([
+            '<script>',
             self._output_facades(),
             '</script>'
         ])
@@ -191,7 +197,7 @@ class Neuron(object):
         return cleaned
 
     def _output_neuron(self):
-        return Neuron.decorate(self.resolve('neuron.js'), 'js')
+        return Neuron.decorate(self.resolve('neuron.js'), 'js', 'main')
 
     @tools.nodebug
     def _output_scripts(self):

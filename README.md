@@ -78,11 +78,17 @@ Registers an css module, and tell neuronjs to output it on the page.
 
 Returns `''`
 
-#### n.output()
+#### n.output_scripts()
 
 Outputs neuron.js, neuron initial configurations and the html of script tags.
 
 For most cases, this method should be used in the base template file, see [example](./sample/sample-jinja.html).
+
+Returns `str`
+
+#### n.output_facades()
+
+Outputs the initialization of facades.
 
 Returns `str`
 
