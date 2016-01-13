@@ -86,6 +86,9 @@ class Neuron(object):
         self._csses.add(css_module)
         return ''
 
+    def src(self, module_id):
+        name, range_, path = module.parse_module_id(item)
+
     def output_css(self):
         self.analyze()
 

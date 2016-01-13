@@ -47,3 +47,10 @@ def parse_module_id(id):
         # version default to '*'
         m.group(2) or '*',
         path)
+
+# returns the max satisfied version of the range
+# @param {str} r Range
+# @param {list} versions The list of existing versions
+def max_satisfying(r, versions):
+    # returns the range directly temporarily for now
+    return r

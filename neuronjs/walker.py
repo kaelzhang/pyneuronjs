@@ -45,27 +45,36 @@ class Walker(object):
         self.index_map = {}
         
         for module_id in facades:
-            name, version, path = module.parse_module_id(module_id)
+            name, range_, path = module.parse_module_id(module_id)
 
             # If the module id facaded contains path, the path will be ignored
-            self._walk_down(name, version, version, path, facade_node)
+            self._walk_down(name, range_, path, facade_node)
 
         return (self.selected, self.graph)
+
+    def _resolve_range(self, name, range_):
+        versions = self._tree[name]
+        if not versions:
+            return
+
+        return module.max_satisfying(range_, versions.keys())
 
     def _guid(self):
         uid = self.guid
         self.guid += 1
         return uid
 
-    def _walk_down_non_facade(self, name, range_, version, dependency_node):
+    def _walk_down_non_facade(self, name, range_, dependency_node):
         # If not facade, module should not contain `path`
-        self._walk_down(name, range_, version, '', dependency_node)
+        self._walk_down(name, range_, '', dependency_node)
 
     # walk down
     # @param {list} entry list of package names
     # @param {dict} tree the result tree to extend
     # @param {list} parsed the list to store parsed entries
-    def _walk_down(self, name, range_, version, path, dependency_node):
+    def _walk_down(self, name, range_, path, dependency_node):
+        version = self._resolve_range(name, range_) or range_
+
         # if the node is already parsed,
         # sometimes we still need to add the dependency to the parent node
         package_range_id = module.package_id(name, range_)
@@ -89,9 +98,10 @@ class Walker(object):
         current_dependency_node = self._get_dependency_node(node)
         for dep in dependencies:
             dep_name, dep_range, dep_path = module.parse_module_id(dep)
-            dep_version = dependencies[dep]
-            self._walk_down_non_facade(dep_name, dep_range, dep_version,
-                            current_dependency_node)
+            self._walk_down_non_facade(
+                dep_name, 
+                dep_range,
+                current_dependency_node)
 
     def _get_dependencies(self, name, version):
         return Walker.access(self._tree, [name, version, 'dependencies'])
@@ -102,7 +112,6 @@ class Walker(object):
             selected[name] = set()
 
         selected[name].add((version, path))
-
 
     def _get_graph_node(self, package_id, version):
         if package_id in self.index_map:

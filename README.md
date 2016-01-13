@@ -78,6 +78,14 @@ Registers an css module, and tell neuronjs to output it on the page.
 
 Returns `''`
 
+#### n.src(id)
+
+Returns the absolute path of the corresponding module.
+
+****
+
+_Methods below are used in base template._
+
 #### n.output_scripts()
 
 Outputs neuron.js, neuron initial configurations and the html of script tags.
