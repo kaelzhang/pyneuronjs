@@ -48,7 +48,7 @@ class Walker(object):
             name, range_, path = module.parse_module_id(module_id)
 
             # If the module id facaded contains path, the path will be ignored
-            self._walk_down(name, range_, path, facade_node)
+            self._walk_down_facade(name, range_, path, facade_node)
 
         return (self.selected, self.graph)
 
@@ -64,17 +64,19 @@ class Walker(object):
         self.guid += 1
         return uid
 
-    def _walk_down_non_facade(self, name, range_, dependency_node):
+    def _walk_down_facade(self, name, range_, path, dependency_node):
+        version = self._resolve_range(name, range_) or range_
+        self._walk_down(name, range_, version, path, dependency_node)
+
+    def _walk_down_non_facade(self, name, range_, version, dependency_node):
         # If not facade, module should not contain `path`
-        self._walk_down(name, range_, '', dependency_node)
+        self._walk_down(name, range_, version, '', dependency_node)
 
     # walk down
     # @param {list} entry list of package names
     # @param {dict} tree the result tree to extend
     # @param {list} parsed the list to store parsed entries
-    def _walk_down(self, name, range_, path, dependency_node):
-        version = self._resolve_range(name, range_) or range_
-
+    def _walk_down(self, name, range_, version, path, dependency_node):
         # if the node is already parsed,
         # sometimes we still need to add the dependency to the parent node
         package_range_id = module.package_id(name, range_)
@@ -98,9 +100,11 @@ class Walker(object):
         current_dependency_node = self._get_dependency_node(node)
         for dep in dependencies:
             dep_name, dep_range, dep_path = module.parse_module_id(dep)
+            dep_version = dependencies[dep]
             self._walk_down_non_facade(
-                dep_name, 
+                dep_name,
                 dep_range,
+                dep_version,
                 current_dependency_node)
 
     def _get_dependencies(self, name, version):
