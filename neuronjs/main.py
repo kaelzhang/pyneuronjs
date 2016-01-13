@@ -87,7 +87,14 @@ class Neuron(object):
         return ''
 
     def src(self, module_id):
-        name, range_, path = module.parse_module_id(item)
+        name, range_, path = module.parse_module_id(module_id)
+        versions = self.dependency_tree[name]
+        if not versions:
+            version = range_
+        else:
+            version = module.max_satisfying(range_, versions.keys())
+
+        return self.resolve(module.module_id(name, version, path))
 
     def output_css(self):
         self.analyze()

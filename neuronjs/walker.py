@@ -65,6 +65,8 @@ class Walker(object):
         return uid
 
     def _walk_down_facade(self, name, range_, path, dependency_node):
+        # The offline ci could not know which facades to load,
+        # so the range version of the facade is still not resolved. 
         version = self._resolve_range(name, range_) or range_
         self._walk_down(name, range_, version, path, dependency_node)
 
@@ -100,6 +102,9 @@ class Walker(object):
         current_dependency_node = self._get_dependency_node(node)
         for dep in dependencies:
             dep_name, dep_range, dep_path = module.parse_module_id(dep)
+
+            # The dependency version of a package is already resolved by 
+            #   neuron-package-dependency
             dep_version = dependencies[dep]
             self._walk_down_non_facade(
                 dep_name,
