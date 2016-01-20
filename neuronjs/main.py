@@ -88,10 +88,10 @@ class Neuron(object):
 
     def src(self, module_id):
         name, range_, path = module.parse_module_id(module_id)
-        versions = self.dependency_tree[name]
-        if not versions:
+        if name not in self.dependency_tree:
             version = range_
         else:
+            versions = self.dependency_tree[name]
             version = module.max_satisfying(range_, versions.keys())
 
         return self.resolve(module.module_id(name, version, path))

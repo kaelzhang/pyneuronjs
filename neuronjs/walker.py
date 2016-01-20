@@ -53,10 +53,10 @@ class Walker(object):
         return (self.selected, self.graph)
 
     def _resolve_range(self, name, range_):
-        versions = self._tree[name]
-        if not versions:
+        if name not in self._tree:
             return
 
+        versions = self._tree[name]
         return module.max_satisfying(range_, versions.keys())
 
     def _guid(self):

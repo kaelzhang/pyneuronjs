@@ -84,7 +84,7 @@ Returns the absolute path of the corresponding module.
 
 ****
 
-_Methods below are used in base template._
+> Methods below are used in base template.
 
 #### n.output_scripts()
 
