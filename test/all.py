@@ -61,6 +61,7 @@ neuron.analyze()
 
 # -> <link rel="" href="//s1.xhscdn.com/">
 print(neuron.output_scripts())
+print(neuron.output_config())
 print(neuron.output_facades())
 print(neuron.output_css())
 print(neuron.src('c/style.css'))

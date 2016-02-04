@@ -123,7 +123,11 @@ class Neuron(object):
 
         return self._get_joiner().join([
             self._output_neuron(),
-            self._output_scripts(),
+            self._output_scripts()
+        ])
+
+    def output_config(self):
+        return self._get_joiner().join([
             '<script>',
             self._output_config(),
             '</script>'
