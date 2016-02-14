@@ -20,11 +20,11 @@ $ pip install neuronjs
 from neuronjs import Neuron
 
 n = Neuron(
-  dependency_tree=dependency_tree,  # must defined
-  resolve=resolve,
-  version=version,
-  cache=cache,
-  debug=False)
+  dependency_tree = dependency_tree,  # must defined
+  resolve = resolve,
+  version = version,
+  cache = cache,
+  debug = False)
 ```
 
 `neuronjs` could be used either in template file or your python controller.
@@ -55,15 +55,15 @@ to generate the key to cache the output result
 - **data** `dict=None` the data of the facade, which will be passed to the entry module.
 - **defer** `bool=False` whether should defer the loading process of the facade. If `True`, the script of the facade and its dependencies will not be loaded at the beginning of the page as much as possible.
 
-Registers a facade entry with `data`. neuronjs will 
+Registers a facade entry with `data`. neuronjs will
 
-Returns `''`(empty string), so you can use this method in python template 
+Returns `''`(empty string), so you can use this method in python template
 
 #### n.combo(id...)
 
 Makes packages of ids to combine into a single file.
 
-- id `str` the module id of commonjs module or css module. 
+- id `str` the module id of commonjs module or css module.
 
 ```js
 n.combo('jquery', 'underscore')
