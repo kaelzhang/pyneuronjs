@@ -1,7 +1,7 @@
 #
 
 
-__author__ = 'Kael Zhang'
+__author__ = 'Kael Zhang <i@kael.me>'
 
 import json
 import hashlib

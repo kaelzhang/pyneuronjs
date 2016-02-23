@@ -37,6 +37,10 @@ REGEX_MODULE_ID = re.compile(
 def parse_module_id(id):
     # there will always a match
     m = re.match(REGEX_MODULE_ID, id)
+
+    if not m:
+        raise ValueError('Invalid module id: "' + id + '", format: <name>[@<version>][/<path>]')
+
     path = m.group(3) or ''
 
     if path == '/':

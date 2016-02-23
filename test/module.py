@@ -41,6 +41,17 @@ class TestModuleParser(unittest.TestCase):
         self.assertEqual(version, '1.0.0')
         self.assertEqual(path, '')
 
+    # issue #23
+    def test_invalid_module_id(self):
+        id = '/jquery/a.js'
+
+        try:
+            module.parse_module_id(id)
+        except Exception, e:
+            error = True
+
+        self.assertEqual(error, True)
+
     def test_module_id(self):
         id = module.module_id('jquery', '*')
         self.assertEqual(id, 'jquery@*/jquery.js')
