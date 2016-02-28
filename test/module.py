@@ -47,7 +47,7 @@ class TestModuleParser(unittest.TestCase):
 
         try:
             module.parse_module_id(id)
-        except Exception, e:
+        except Exception:
             error = True
 
         self.assertEqual(error, True)
