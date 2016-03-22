@@ -46,6 +46,18 @@ class TestWalker(unittest.TestCase):
         self.assertEqual(packages.get('b'), packages2.get('b'))
         self.assertEqual(packages.get('c'), packages2.get('c'))
 
+    def test_multiple_entries(self):
+        packages, graph = get_result(['home/a.js', 'home/b.js'])
+        self.assertEqual(len(packages.get('home')), 2)
+
+        expected = [('*', '/a.js'), ('*', '/b.js')]
+        expected.sort()
+
+        result = list(packages.get('home'))
+        result.sort()
+
+        self.assertEqual(expected, result)
+
 
 suite = unittest.TestLoader().loadTestsFromTestCase(TestWalker)
 runner = unittest.TextTestRunner(verbosity=2).run(suite)

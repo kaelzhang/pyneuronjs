@@ -50,10 +50,10 @@ neuron = Neuron(
 neuron.facade('home/a.js', {
   'a': 1
 })
-# neuron.combo('home', 'b@0.1.0', 'c')
+neuron.facade('home/b.js')
 
-neuron.css('home/style.css')
-neuron.css('b/style.css', 'c/style.css')
+# neuron.css('home/style.css')
+# neuron.css('b/style.css', 'c/style.css')
 
 neuron.analyze()
 neuron.analyze()

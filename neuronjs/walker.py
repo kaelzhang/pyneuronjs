@@ -43,7 +43,7 @@ class Walker(object):
 
         # map to store the index of the dependency node
         self.index_map = {}
-        
+
         for module_id in facades:
             name, range_, path = module.parse_module_id(module_id)
 
@@ -66,7 +66,7 @@ class Walker(object):
 
     def _walk_down_facade(self, name, range_, path, dependency_node):
         # The offline ci could not know which facades to load,
-        # so the range version of the facade is still not resolved. 
+        # so the range version of the facade is still not resolved.
         version = self._resolve_range(name, range_) or range_
         self._walk_down(name, range_, version, path, dependency_node)
 
@@ -86,13 +86,15 @@ class Walker(object):
         node, index = self._get_graph_node(package_id, version)
         dependency_node[package_range_id] = index
 
+        # Always select the module(not package),
+        # because a package might have more than one modules
+        self._select(name, version, path)
+
         if package_id in self.parsed:
             # prevent parsing duplicately.
             return
 
         self.parsed.append(package_id)
-
-        self._select(name, version, path)
 
         # Walk dependencies
         dependencies = self._get_dependencies(name, version)
@@ -103,7 +105,7 @@ class Walker(object):
         for dep in dependencies:
             dep_name, dep_range, dep_path = module.parse_module_id(dep)
 
-            # The dependency version of a package is already resolved by 
+            # The dependency version of a package is already resolved by
             #   neuron-package-dependency
             dep_version = dependencies[dep]
             self._walk_down_non_facade(
